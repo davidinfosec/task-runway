@@ -1,0 +1,34 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net8.0-windows</TargetFramework>
+		<Nullable>enable</Nullable>
+		<UseWindowsForms>true</UseWindowsForms>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<AssemblyName>Task_Runway_x64</AssemblyName>
+		<Company>DavidInfosec</Company>
+		<PackageIcon>app_icon.png</PackageIcon>
+		<ApplicationIcon>bin\Release\net8.0-windows\publish\win-x64\app_icon.ico</ApplicationIcon>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<Content Include="bin\Release\net8.0-windows\publish\win-x64\app_icon.ico" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Update="app_icon.ico">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="E:\app_icon-1,app_icon-2,app_icon-3\app_icon.png">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+	</ItemGroup>
+
+</Project>
