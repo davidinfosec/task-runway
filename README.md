@@ -23,7 +23,12 @@ This essentially will look like:
 python <script.py> <flags>
 ```
 
-For housekeeping, you can also open the path to any tool you select, save any flag to its own file, copy the config.txt to clipboard, Always-on-top so you can let Task Runway float with you all day, and much more. 
+For housekeeping, you can also:
+- open the path to any tool you select
+- save any flag to its own file
+- copy the config.txt to clipboard
+- Always-on-top so you can let Task Runway float with you all day
+- ..and much more. 
 
 #### Get Started:
 
