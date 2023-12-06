@@ -28,7 +28,9 @@ For housekeeping, you can also:
 - save any flag to its own file
 - copy the config.txt to clipboard
 - Always-on-top so you can let Task Runway float with you all day
-- ..and much more. 
+- ..and much more.
+
+No more memorizing file paths when you're opening your programs. Easily access your tools when you need them. Task Runway helps you take flight so you can stay productive.
 
 #### Get Started:
 
