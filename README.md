@@ -1,6 +1,6 @@
 # Task Runway Documentation
 
-![Task Runway Logo](https://github.com/davidinfosec/task-runway/assets/87215831/00496378-d3f4-4e4d-949a-a1dc14825c57)
+![mspaint_MPd4EWVVOG](https://github.com/davidinfosec/task-runway/assets/87215831/1d7fe43d-8547-44e6-a838-a6d8c5b3f8d0)
 
 Task Runway is an open-source tool designed as a central location to streamline access to your preferred scripting tools. It offers both a Python CLI/GUI, and a more preferred C# version, providing flexibility for different user preferences.
 
@@ -10,11 +10,13 @@ The C# version of Task Runway is very light-weight executable, only 209KB, offer
 
 Task Runway supports scripts, executables, and websites. Simply add your desired tool to the list, and it will populate in a list box for easy access.
 
-![firefox_B8n9zzLJbY](https://github.com/davidinfosec/task-runway/assets/87215831/3c754be5-0611-4b80-989d-6e153e135489)
+![firefox_B8n9zzLJbY](https://github.com/davidinfosec/task-runway/assets/87215831/493e1f10-6eaa-45e6-a2e8-7546acc50df6)
 
-Task Runway is tiny, but powerful, allowing you to add custom flags to scripts where you need them. For example, my Domain Name Ninja tool, which uses custom flags in the python command, I can still specify those parameters very simply like so:
 
-![firefox_QSEYsr2Y0Y](https://github.com/davidinfosec/task-runway/assets/87215831/a8dc5ba6-f49c-4f7f-b9e6-98dd464c0c76)
+Task Runway is tiny, but powerful, allowing you to add custom flags to scripts where you need them. For example, my [Domain Name Ninja tool](https://github.com/davidinfosec/Domain-Name-Ninja), which uses custom flags in the python command, I can still specify those parameters very simply like so:
+
+![firefox_QSEYsr2Y0Y](https://github.com/davidinfosec/task-runway/assets/87215831/b287dc70-ffd7-4560-a080-a1a7ac11d49a)
+
 
 This essentially will look like:
 ```
