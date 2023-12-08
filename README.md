@@ -17,16 +17,15 @@ Task Runway is tiny, but powerful.
 ![explorer_5q74JXyN6j](https://github.com/davidinfosec/task-runway/assets/87215831/106245a9-5313-4a98-8fd0-b60e354d6140)
 
 
-- **Download Explorer**  (Hand-picked tools ready for you to download), featuring tools like:
-  - Sp.py, 
-  - Domain Name Ninja, 
-  - Dropfilter CLI (by Crock), 
-  - ReportName.com, 
-  - WHOIS Domain Info, 
-  - Easy-Template, 
-  - Geo IP API Tool, 
-  - DownloadClip 
-  - YouTube Downloader, 
+**Download Explorer** (Hand-picked tools ready for you to download), featuring tools like:
+- [Sp.py](https://github.com/davidinfosec/sp.py)
+- [Domain Name Ninja](https://github.com/davidinfosec/domain-name-ninja)
+- [Dropfilter CLI (by Crock)](https://github.com/crock/dropfilter-cli)
+- [ReportName.com](https://www.reportname.com)
+- [WHOIS Domain Info](https://github.com/davidinfosec/whois-domain-info/)
+- [Easy-Template](https://github.com/davidinfosec/easy-template)
+- [Geo IP API Tool](https://github.com/davidinfosec/ip-tool)
+- [DownloadClip](https://github.com/davidinfosec/downloadclip)
 
 - **Always-On-Top, to let Task Runway stay accessible for your daily workflow.**
 
