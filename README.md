@@ -152,7 +152,7 @@ Task Runway is open-source software released under the [MIT License](https://ope
 
 ## Support
 
-If you found this useful, consider donating towards my latest projects. [Donate](https://www.poof.io/tip/@davidinfosec)
+If you found this useful, consider donating towards my latest projects. [Donate](https://www.davidinfosec.com/donate)
 
 You can also check out my blog here at [DavidInfosec.com](https://davidinfosec.com)
 
