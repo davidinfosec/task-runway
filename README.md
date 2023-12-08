@@ -1,6 +1,8 @@
 # Task Runway Documentation
 
-![mspaint_MPd4EWVVOG](https://github.com/davidinfosec/task-runway/assets/87215831/1d7fe43d-8547-44e6-a838-a6d8c5b3f8d0)
+![explorer_5q74JXyN6j](https://github.com/davidinfosec/task-runway/assets/87215831/106245a9-5313-4a98-8fd0-b60e354d6140)
+
+
 
 Task Runway is an open-source tool designed as a central location to streamline access to your preferred scripting tools. It offers both a Python CLI/GUI, and a more preferred C# version, providing flexibility for different user preferences.
 
@@ -43,7 +45,7 @@ Task Runway is tiny, but powerful.
 - [Geo IP API Tool](https://github.com/davidinfosec/ip-tool)
 - [DownloadClip](https://github.com/davidinfosec/downloadclip)
 
-![explorer_5q74JXyN6j](https://github.com/davidinfosec/task-runway/assets/87215831/106245a9-5313-4a98-8fd0-b60e354d6140)
+
 
 No more memorizing file paths when you're opening your programs. Easily access your tools when you need them. Task Runway helps you take flight so you can stay productive.
 
@@ -76,6 +78,8 @@ If you enjoy using it, consider [donating](https://www.davidinfosec.com/donate) 
 ## Python CLI
 
 Download: [CLI Release](https://github.com/davidinfosec/task-runway/releases/download/v1.0.0/taskrunway_cli.py) and click the download button in the top right.
+
+![mspaint_MPd4EWVVOG](https://github.com/davidinfosec/task-runway/assets/87215831/1d7fe43d-8547-44e6-a838-a6d8c5b3f8d0)
 
 ### Adding a Tool
 
