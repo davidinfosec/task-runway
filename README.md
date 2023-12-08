@@ -69,7 +69,7 @@ If you enjoy using it, consider [donating](https://www.poof.io/tip/@davidinfosec
 
 ## Python CLI
 
-Download: [CLI Release](https://github.com/davidinfosec/task-runway/blob/main/taskrunway_cli.py) and click the download button in the top right.
+Download: [CLI Release](https://github.com/davidinfosec/task-runway/releases/download/v1.0.0/taskrunway_cli.py) and click the download button in the top right.
 
 ### Adding a Tool
 
@@ -118,7 +118,7 @@ python taskrunway_cli.py
 
 ## Python GUI
 
-Download: [Python GUI Release](https://github.com/davidinfosec/task-runway/blob/main/taskrunway_gui.py) and click the download button in the top right.
+Download: [Python GUI Release](https://github.com/davidinfosec/task-runway/releases/download/v1.0.0/taskrunway_gui.py) and click the download button in the top right.
 
 Install libraries:
 ```
