@@ -59,7 +59,7 @@ Note (the installer will do these for you, but good to know):
 - keep the config.txt in the same path as the executable
 
 Thank you for using Task Runway. I hope it helps you as much as it helped me. 
-If you enjoy using it, consider [donating](https://www.poof.io/tip/@davidinfosec) or [checking out my ReportName.com project](https://www.reportname.com).
+If you enjoy using it, consider [donating](https://www.davidinfosec.com/donate) or [checking out my ReportName.com project](https://www.reportname.com).
 
 ## Uninstall
 1. Backup your config.txt file (with the save config.txt feature)
