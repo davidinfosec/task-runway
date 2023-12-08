@@ -28,8 +28,11 @@ Task Runway is tiny, but powerful.
 - YouTube Downloader, 
 
 **Always-On-Top, to let Task Runway stay accessible for your daily workflow.**
+
 **Open Config, Save Config, directly modify and customize Task Runway to work for you.**
+
 **Website support, for all your favorite web applications, launch right into your web browser.**
+
 **Custom flags**, add custom flags to scripts where you need them.
 - For example, my [Domain Name Ninja tool](https://github.com/davidinfosec/Domain-Name-Ninja), which uses custom flags in the python command, I can still specify those parameters very simply like so:
 
