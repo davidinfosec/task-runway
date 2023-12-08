@@ -28,7 +28,7 @@ Task Runway is tiny, but powerful.
   ![firefox_QSEYsr2Y0Y](https://github.com/davidinfosec/task-runway/assets/87215831/b287dc70-ffd7-4560-a080-a1a7ac11d49a)
 
 
-  - This essentially will look like:
+  - This is the equivalent if you ran the following command in your terminal:
     ```
     python <script.py> <flags>
     ```
