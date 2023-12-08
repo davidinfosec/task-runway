@@ -20,13 +20,15 @@ Task Runway is tiny, but powerful.
 
 ## Features
 
-- **Always-On-Top, to let Task Runway stay accessible for your daily workflow.**
+- **Always-On-Top, to let Task Runway stay accessible for your daily workflow.**, let Task Runway fly with you while you tab between your applications.
 
-- **Open Config, Save Config, directly modify and customize Task Runway to work for you.**
+- **Open Config, Save Config, directly modify and customize Task Runway to work for you.**, share your config.txt file with co-workers and simplify complicated processes with standardized configurations. 
 
-- **Website support, for all your favorite web applications, launch right into your web browser.** **Add specific URLs like your Gmail or Calendar, so you can access it quickly throughout your busy week.**
+- **Website support, for all your favorite web applications, launch right into your web browser.**, add specific URLs like your Gmail or Calendar, so you can access it quickly throughout your busy week.
 
-- **Custom flags**, add custom flags to scripts where you need them.
+- **Batch file / Server support**, imagine you have a Minecraft server, and you want to spin it up for friends every now and again, you can easily launch the batch file when needed.
+
+- **Custom flags**, add custom flags to scripts where you need them, reliable for more complex tasks.
   - For example, my [Domain Name Ninja tool](https://github.com/davidinfosec/Domain-Name-Ninja), which uses custom flags in the python command, I can still specify those parameters very simply like so:
 
   ![firefox_QSEYsr2Y0Y](https://github.com/davidinfosec/task-runway/assets/87215831/b287dc70-ffd7-4560-a080-a1a7ac11d49a)
