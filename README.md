@@ -9,11 +9,10 @@ Task Runway is an open-source tool designed as a central location to streamline 
 The C# version of Task Runway is very light-weight executable, only 1MB, offering a swift and enjoyable user experience. The source code is also provided for customization.
 
 Task Runway supports scripts, executables, and websites. Simply add your desired tool to the list, and it will populate in a list box for easy access.
-  - ![firefox_B8n9zzLJbY](https://github.com/davidinfosec/task-runway/assets/87215831/493e1f10-6eaa-45e6-a2e8-7546acc50df6)
+![firefox_B8n9zzLJbY](https://github.com/davidinfosec/task-runway/assets/87215831/493e1f10-6eaa-45e6-a2e8-7546acc50df6)
 
 Task Runway is tiny, but powerful.
-
-  - ![Task_Runway_x64_4dL3TVwW9T](https://github.com/davidinfosec/task-runway/assets/87215831/0967f02c-a732-4155-ab72-eeea6099cdf8)
+![Task_Runway_x64_4dL3TVwW9T](https://github.com/davidinfosec/task-runway/assets/87215831/0967f02c-a732-4155-ab72-eeea6099cdf8)
 
 - **Download Explorer**  (Hand-picked tools ready for you to download), featuring tools like:
   - Sp.py, 
@@ -35,20 +34,13 @@ Task Runway is tiny, but powerful.
 - **Custom flags**, add custom flags to scripts where you need them.
   - For example, my [Domain Name Ninja tool](https://github.com/davidinfosec/Domain-Name-Ninja), which uses custom flags in the python command, I can still specify those parameters very simply like so:
 
-    - ![firefox_QSEYsr2Y0Y](https://github.com/davidinfosec/task-runway/assets/87215831/b287dc70-ffd7-4560-a080-a1a7ac11d49a)
+  ![firefox_QSEYsr2Y0Y](https://github.com/davidinfosec/task-runway/assets/87215831/b287dc70-ffd7-4560-a080-a1a7ac11d49a)
 
 
 This essentially will look like:
 ```
 python <script.py> <flags>
 ```
-
-For housekeeping, you can also:
-- open the path to any tool you select
-- save any flag to its own file
-- copy the config.txt to clipboard
-- Always-on-top so you can let Task Runway float with you all day
-- ..and much more.
 
 No more memorizing file paths when you're opening your programs. Easily access your tools when you need them. Task Runway helps you take flight so you can stay productive.
 
