@@ -14,6 +14,14 @@ Task Runway supports scripts, executables, and websites. Simply add your desired
 
 Task Runway is tiny, but powerful.
 
+- **Always-On-Top, to let Task Runway stay accessible for your daily workflow.**
+
+- **Open Config, Save Config, directly modify and customize Task Runway to work for you.**
+
+- **Website support, for all your favorite web applications, launch right into your web browser.**
+
+- **Custom flags**, add custom flags to scripts where you need them.
+
 ![explorer_5q74JXyN6j](https://github.com/davidinfosec/task-runway/assets/87215831/106245a9-5313-4a98-8fd0-b60e354d6140)
 
 
@@ -29,13 +37,7 @@ Task Runway is tiny, but powerful.
 
 
 
-- **Always-On-Top, to let Task Runway stay accessible for your daily workflow.**
 
-- **Open Config, Save Config, directly modify and customize Task Runway to work for you.**
-
-- **Website support, for all your favorite web applications, launch right into your web browser.**
-
-- **Custom flags**, add custom flags to scripts where you need them.
   
   - For example, my [Domain Name Ninja tool](https://github.com/davidinfosec/Domain-Name-Ninja), which uses custom flags in the python command, I can still specify those parameters very simply like so:
 
