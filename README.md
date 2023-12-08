@@ -37,7 +37,7 @@ No more memorizing file paths when you're opening your programs. Easily access y
 You will need to install .NET framework version 8.0.100, available here: [.NET framework dependency](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/sdk-8.0.100-windows-x64-installer).
 
 3-Step Download:
-1. Download the latest version of Task Runway (x64) here: [Latest Version of Task Runway](https://github.com/davidinfosec/task-runway/raw/main/Task_Runway_x64/Task_Runway_x64.zip)
+1. Download the latest version of Task Runway (x64) here: [Latest Version of Task Runway](https://github.com/davidinfosec/task-runway/raw/main/TaskRunwaySetup.msi)
 2. Extract the folder to any directory.
 3. Run the executable
 
