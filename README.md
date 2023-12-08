@@ -4,7 +4,7 @@
 
 
 
-Task Runway is an **open-source application** designed as a central location to take flight into your favorite tools. It is coded in C#, with alternative versions in Python available.
+Task Runway is an **open-source application** designed as a central location to take flight into your favorite tools. It is developed in C#, with alternative versions in Python available.
 
 As efforts to support the development and support of Task Runway, a [$10 donation is strongly encouraged](https://www.davidinfosec.com/donate) if you find value with this application. **With your contribution you will receive an exclusive Supporter's License Key.** Please take your time to evaluate before donating. We want to keep things light-weight and open source.
 
