@@ -79,7 +79,8 @@ If you enjoy using it, consider [donating](https://www.davidinfosec.com/donate) 
 
 Download: [CLI Release](https://github.com/davidinfosec/task-runway/releases/download/v1.0.0/taskrunway_cli.py) and click the download button in the top right.
 
-![mspaint_MPd4EWVVOG](https://github.com/davidinfosec/task-runway/assets/87215831/1d7fe43d-8547-44e6-a838-a6d8c5b3f8d0)
+![firefox_Jwa8E7EOAT](https://github.com/davidinfosec/task-runway/assets/87215831/5a27992b-ae92-47ad-a3c7-b586e0f509e9)
+
 
 ### Adding a Tool
 
