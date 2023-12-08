@@ -12,8 +12,26 @@ Task Runway supports scripts, executables, and websites. Simply add your desired
 
 ![firefox_B8n9zzLJbY](https://github.com/davidinfosec/task-runway/assets/87215831/493e1f10-6eaa-45e6-a2e8-7546acc50df6)
 
+Task Runway is tiny, but powerful.
 
-Task Runway is tiny, but powerful, allowing you to add custom flags to scripts where you need them. For example, my [Domain Name Ninja tool](https://github.com/davidinfosec/Domain-Name-Ninja), which uses custom flags in the python command, I can still specify those parameters very simply like so:
+![Task_Runway_x64_4dL3TVwW9T](https://github.com/davidinfosec/task-runway/assets/87215831/0967f02c-a732-4155-ab72-eeea6099cdf8)
+
+*Download Explorer**  (Hand-picked tools ready for you to download), featuring tools like:
+- Sp.py, 
+- Domain Name Ninja, 
+- Dropfilter CLI (by Crock), 
+- ReportName.com, 
+- WHOIS Domain Info, 
+- Easy-Template, 
+- Geo IP API Tool, 
+- DownloadClip 
+- YouTube Downloader, 
+
+- **Always-On-Top, to let Task Runway stay accessible for your daily workflow.**
+- **Open Config, Save Config, directly modify and customize Task Runway to work for you.**
+- **Website support, for all your favorite web applications, launch right into your web browser.**
+- **Custom flags**, add custom flags to scripts where you need them.
+  For example, my [Domain Name Ninja tool](https://github.com/davidinfosec/Domain-Name-Ninja), which uses custom flags in the python command, I can still specify those parameters very simply like so:
 
 ![firefox_QSEYsr2Y0Y](https://github.com/davidinfosec/task-runway/assets/87215831/b287dc70-ffd7-4560-a080-a1a7ac11d49a)
 
