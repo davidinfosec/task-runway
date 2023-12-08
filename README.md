@@ -6,6 +6,8 @@
 
 Task Runway is an open-source tool designed as a central location to streamline access to your preferred scripting tools. It offers both a Python CLI/GUI, and a more preferred C# version, providing flexibility for different user preferences.
 
+As efforts to support the development and support of Task Runway, a $10 donation is strongly encouraged if you find value with the tool. Please take your time to evaluate the tool before donating. We want to keep things light-weight and open source, but we appreciate your participation. 
+
 ## C# GUI - x64 Executable (Recommended)
 
 The C# version of Task Runway is very light-weight executable, only 1MB, offering a swift and enjoyable user experience. The source code is also provided for customization.
