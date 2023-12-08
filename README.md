@@ -14,7 +14,7 @@ Task Runway supports scripts, executables, and websites. Simply add your desired
 
 Task Runway is tiny, but powerful.
 
-**Features:**
+## Features
 
 - **Always-On-Top, to let Task Runway stay accessible for your daily workflow.**
 
