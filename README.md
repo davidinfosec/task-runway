@@ -57,7 +57,7 @@ Easy Download:
 2. Run the installer
 3. Download the .NET framework after the install, if necessary. (listed above)
 
-Note:
+Note (the installer will do these for you, but good to know):
 - keep the app_icon.ico in the same path as the executable
 - keep the config.txt in the same path as the executable
 
