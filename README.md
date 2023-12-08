@@ -138,7 +138,7 @@ python taskrunway_gui.py
 
 Note: The C# version is less buggy, and is lighter-weight, but this is here for those who wish to have it, or even improve it!
 
-Feel free to reach out, report issues, or contribute on [GitHub](https://github.com/davidinfosec/task-runway).
+Feel free to reach out, report issues here: https://github.com/davidinfosec/task-runway/issues
 
 ## License
 
