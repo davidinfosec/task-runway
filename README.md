@@ -47,7 +47,7 @@ Task Runway is tiny, but powerful.
 
 No more memorizing file paths when you're opening your programs. Easily access your tools when you need them. Task Runway helps you take flight so you can stay productive.
 
-#### Get Started:
+## Download:
 
 Easy Download:
 1. Download the latest version of Task Runway (x64) here: [Latest Version of Task Runway](https://github.com/davidinfosec/task-runway/releases/download/v1.0.0/TaskRunwaySetup.msi)
