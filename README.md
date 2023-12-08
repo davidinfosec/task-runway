@@ -85,7 +85,9 @@ Download: [CLI Release](https://github.com/davidinfosec/task-runway/releases/dow
 
 Run by opening a command line or terminal window, and type:
 
-```python taskrunway_cli.py```
+```bash
+python taskrunway_cli.py
+```
 
 ![firefox_Jwa8E7EOAT](https://github.com/davidinfosec/task-runway/assets/87215831/5a27992b-ae92-47ad-a3c7-b586e0f509e9)
 
@@ -126,11 +128,6 @@ Type `exit` when prompted for action.
 2. The available commands and their descriptions will be shown.
 
 ## Example Usage
-
-```bash
-python taskrunway_cli.py
-```
-
 
 
 ---
