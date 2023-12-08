@@ -2,7 +2,24 @@
 
 ![explorer_5q74JXyN6j](https://github.com/davidinfosec/task-runway/assets/87215831/106245a9-5313-4a98-8fd0-b60e354d6140)
 
+# Task Runway Release Changelog for December 8th, 2023
 
+Introducing Task Runway Version 1.0.1:
+
+## New Features
+
+1. **Movable Entries:**
+
+2. **Ascending/Descending Sorting:**
+
+3. **Edit Path Right-Click Context Menu:**
+
+4. **Toggleable Search Bar:**
+
+5. **Added Minimize Button:**
+
+6. **Expanded File Format Support:**
+   - Added support for Markdown (.md), Text (.txt), Java Archive (.jar), Word Document (.docx), and empty folders.
 
 Task Runway is an **open-source application** designed as a central location to take flight into your favorite tools. It is developed in C#, with alternative versions in Python available.
 
