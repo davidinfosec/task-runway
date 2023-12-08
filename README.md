@@ -33,9 +33,6 @@ Task Runway is tiny, but powerful.
     python <script.py> <flags>
     ```
 
-![explorer_5q74JXyN6j](https://github.com/davidinfosec/task-runway/assets/87215831/106245a9-5313-4a98-8fd0-b60e354d6140)
-
-
 **Download Explorer** (Hand-picked tools ready for you to download), featuring tools like:
 - [Sp.py](https://github.com/davidinfosec/sp.py)
 - [Domain Name Ninja](https://github.com/davidinfosec/domain-name-ninja)
@@ -45,6 +42,8 @@ Task Runway is tiny, but powerful.
 - [Easy-Template](https://github.com/davidinfosec/easy-template)
 - [Geo IP API Tool](https://github.com/davidinfosec/ip-tool)
 - [DownloadClip](https://github.com/davidinfosec/downloadclip)
+
+![explorer_5q74JXyN6j](https://github.com/davidinfosec/task-runway/assets/87215831/106245a9-5313-4a98-8fd0-b60e354d6140)
 
 No more memorizing file paths when you're opening your programs. Easily access your tools when you need them. Task Runway helps you take flight so you can stay productive.
 
