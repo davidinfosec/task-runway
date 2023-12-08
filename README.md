@@ -6,17 +6,17 @@
 
 ## New Features
 
-1. **Movable Entries:**
+- **Movable Entries**
 
-2. **Ascending/Descending Sorting:**
+- **Ascending/Descending Sorting**
 
-3. **Edit Path Right-Click Context Menu:**
+- **Edit Path Right-Click Context Menu**
 
-4. **Toggleable Search Bar:**
+- **Toggleable Search Bar**
 
-5. **Added Minimize Button:**
+- **Added Minimize Button**
 
-6. **Expanded File Format Support:**
+- **Expanded File Format Support**
    - Added support for Markdown (.md), Text (.txt), Java Archive (.jar), Word Document (.docx), and empty folders.
 
 Task Runway is an **open-source application** designed as a central location to take flight into your favorite tools. It is developed in C#, with alternative versions in Python available.
