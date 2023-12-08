@@ -22,6 +22,11 @@ namespace TaskRunway
             InitializeComponent();
             this.form1 = form1;
 
+            // Add the following lines to disable maximize button and resizing
+            this.MaximizeBox = false;
+            this.FormBorderStyle = FormBorderStyle.FixedSingle;
+
+
             AddTool(new ToolInfo
             {
                 Name = "Task Runway CLI",
