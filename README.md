@@ -2,9 +2,7 @@
 
 ![explorer_5q74JXyN6j](https://github.com/davidinfosec/task-runway/assets/87215831/106245a9-5313-4a98-8fd0-b60e354d6140)
 
-# Task Runway Release Changelog for December 8th, 2023
-
-Introducing Task Runway Version 1.0.1:
+# Task Runway v1.0.1 Release Changelog - December 8th, 2023
 
 ## New Features
 
