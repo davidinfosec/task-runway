@@ -66,9 +66,9 @@ If you enjoy using it, consider [donating](https://www.poof.io/tip/@davidinfosec
 
 ![explorer_pQTaBSlgQr](https://github.com/davidinfosec/task-runway/assets/87215831/433b9627-ea09-4641-bef6-ceb9028bc8bb)
 
-3. Press the Windows Key, type 'Add or Remove Programs', and search for TaskRunwaySetup.
+2. Press the Windows Key, type 'Add or Remove Programs', and search for TaskRunwaySetup.
 
-4. Press the Uninstall button
+3. Press the Uninstall button
 
 ---
 
