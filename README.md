@@ -19,6 +19,9 @@
 - **Expanded File Format Support**
    - Added support for Markdown (.md), Text (.txt), Java Archive (.jar), Word Document (.docx), and empty folders.
 
+ #### Bug hotfixes December 10th, 2023
+- Fixed item path/edit name not mapping properly to search, sort by ascending, sort by descending, move item up, move item down.
+
 Task Runway is an **open-source application** designed as a central location to take flight into your favorite tools. It is developed in C#, with alternative versions in Python available.
 
 As efforts to support the development and support of Task Runway, a [$10 donation is strongly encouraged](https://www.davidinfosec.com/donate) if you find value with this application. **With your contribution you will receive an exclusive Supporter's License Key.** Please take your time to evaluate before donating. We want to keep things light-weight and open source.
