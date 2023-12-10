@@ -1,9 +1,11 @@
-// Task_Runway_x64, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+﻿// Task_Runway_x64, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
 // Form1
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.DirectoryServices;
 using System.Drawing;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -13,6 +15,7 @@ using TaskRunway;
 
 public class Form1 : Form
 {
+    private bool isSearchbarVisible = true;
     public class ExploreToolsForm : Form
     {
         public ExploreToolsForm()
@@ -73,30 +76,30 @@ public class Form1 : Form
 
     private Label label2;
 
-    private Button button2;
-
     private Label label4;
 
-private void ExploreNewTools()
-{
-    form2 = new TaskRunwayExplorer(this);
+    private void ExploreNewTools()
+    {
+        form2 = new TaskRunwayExplorer(this);
 
-    // Handle the Shown event to refresh checkedListBox3 when the form is shown
-    form2.Shown += (sender, e) => form2.RefreshCheckedListBox3();
+        // Handle the Shown event to refresh checkedListBox3 when the form is shown
+        form2.Shown += (sender, e) => form2.RefreshCheckedListBox3();
 
-    form2.Show();
-}
+        form2.Show();
+    }
 
 
     public Form1()
     {
         InitializeComponent();
         InitializeContextMenu();
+        textBox1.TextChanged += textBox1_TextChanged;
+        textBox1.KeyDown += textBox1_KeyDown;
         string relativeIconPath = Path.Combine(Application.StartupPath, "app_icon.ico");
         base.Icon = new Icon(relativeIconPath);
         LoadToolsFromConfig();
         base.MaximizeBox = false;
-        base.MinimizeBox = false;
+        base.MinimizeBox = true;
         base.FormBorderStyle = FormBorderStyle.FixedSingle;
         listBox1.KeyDown += listBox1_KeyDown;
     }
@@ -115,6 +118,118 @@ private void ExploreNewTools()
         listBox1.MouseDown += listBox1_MouseDown;
     }
 
+    private void SortToolsAscending()
+    {
+        // Retrieve the selected tool from filteredTools
+        int selectedIndex = listBox1.SelectedIndex;
+        ScriptingTool selectedTool = (selectedIndex >= 0 && selectedIndex < filteredTools.Count) ? filteredTools[selectedIndex] : null;
+
+        // Implement logic to sort originalOrderTools in ascending order
+        originalOrderTools = originalOrderTools.OrderBy(tool => tool.Name).ToList();
+
+        // Update the tools list based on the sorted originalOrderTools
+        tools = new List<ScriptingTool>(originalOrderTools);
+
+        // Update the filteredTools list if a search is active
+        if (!string.IsNullOrWhiteSpace(textBox1.Text))
+        {
+            PerformSearch();
+        }
+        else
+        {
+            UpdateListBox();
+            // Explicitly update filteredTools based on the sorted tools list
+            filteredTools = new List<ScriptingTool>(tools);
+        }
+
+        // Restore the selected index after the update
+        listBox1.SelectedIndex = (selectedTool != null) ? tools.IndexOf(selectedTool) : -1;
+    }
+
+    private void SortToolsDescending()
+    {
+        // Retrieve the selected tool from filteredTools
+        int selectedIndex = listBox1.SelectedIndex;
+        ScriptingTool selectedTool = (selectedIndex >= 0 && selectedIndex < filteredTools.Count) ? filteredTools[selectedIndex] : null;
+
+        // Implement logic to sort originalOrderTools in descending order
+        originalOrderTools = originalOrderTools.OrderByDescending(tool => tool.Name).ToList();
+
+        // Update the tools list based on the sorted originalOrderTools
+        tools = new List<ScriptingTool>(originalOrderTools);
+
+        // Update the filteredTools list if a search is active
+        if (!string.IsNullOrWhiteSpace(textBox1.Text))
+        {
+            PerformSearch();
+        }
+        else
+        {
+            UpdateListBox();
+            // Explicitly update filteredTools based on the sorted tools list
+            filteredTools = new List<ScriptingTool>(tools);
+        }
+
+        // Restore the selected index after the update
+        listBox1.SelectedIndex = (selectedTool != null) ? tools.IndexOf(selectedTool) : -1;
+    }
+
+
+
+
+    private void MoveItemUp()
+    {
+        int selectedIndex = listBox1.SelectedIndex;
+        if (selectedIndex > 0)
+        {
+            // Retrieve the selected tool from filteredTools
+            ScriptingTool selectedTool = filteredTools[selectedIndex];
+
+            // Swap the selected item with the one above it
+            SwapItemsInList(tools, selectedIndex, selectedIndex - 1);
+            SwapItemsInList(originalOrderTools, selectedIndex, selectedIndex - 1);
+            SwapItemsInList(filteredTools, selectedIndex, selectedIndex - 1);
+
+            // Update the display in the listBox
+            UpdateListBox();
+
+            // Update the selected index after the swap
+            listBox1.SelectedIndex = selectedIndex - 1;
+        }
+    }
+
+    private void MoveItemDown()
+    {
+        int selectedIndex = listBox1.SelectedIndex;
+        if (selectedIndex < listBox1.Items.Count - 1 && selectedIndex != -1)
+        {
+            // Retrieve the selected tool from filteredTools
+            ScriptingTool selectedTool = filteredTools[selectedIndex];
+
+            // Swap the selected item with the one below it
+            SwapItemsInList(tools, selectedIndex, selectedIndex + 1);
+            SwapItemsInList(originalOrderTools, selectedIndex, selectedIndex + 1);
+            SwapItemsInList(filteredTools, selectedIndex, selectedIndex + 1);
+
+            // Update the display in the listBox
+            UpdateListBox();
+
+            // Update the selected index after the swap
+            listBox1.SelectedIndex = selectedIndex + 1;
+        }
+    }
+
+
+    // Helper method to swap items in a list
+    private void SwapItemsInList<T>(List<T> list, int index1, int index2)
+    {
+        T temp = list[index1];
+        list[index1] = list[index2];
+        list[index2] = temp;
+    }
+
+
+
     private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
     {
     }
@@ -132,54 +247,189 @@ private void ExploreNewTools()
         }
     }
 
+ 
+
     private void InitializeContextMenu()
     {
         listBoxContextMenu = new ContextMenuStrip();
-        ToolStripMenuItem refreshItem = new ToolStripMenuItem("Refresh");
+
+
+        // Edit Path
+        ToolStripMenuItem editPathItem = new ToolStripMenuItem("Edit Path");
+        editPathItem.Click += delegate
+        {
+            EditPath();
+        };
+        listBoxContextMenu.Items.Add(editPathItem);
+
+        // ... (existing code)
+
+        listBox1.ContextMenuStrip = listBoxContextMenu;
+        listBox1.MouseDown += listBox1_MouseDown;
+   
+
+    // Refresh
+    ToolStripMenuItem refreshItem = new ToolStripMenuItem("Refresh");
         refreshItem.Click += delegate
         {
             RefreshTools();
         };
         listBoxContextMenu.Items.Add(refreshItem);
+
+        // Undo
         ToolStripMenuItem undoItem = new ToolStripMenuItem("Undo");
         undoItem.Click += delegate
         {
             UndoChanges();
         };
         listBoxContextMenu.Items.Add(undoItem);
+
+        // Custom Flags
         ToolStripMenuItem customFlagsItem = new ToolStripMenuItem("Custom Flags");
         customFlagsItem.Click += delegate
         {
             CustomFlags();
         };
         listBoxContextMenu.Items.Add(customFlagsItem);
+
         listBoxContextMenu.Items.Add(new ToolStripSeparator());
+
+        // Rename
         ToolStripMenuItem renameItem = new ToolStripMenuItem("Rename");
         renameItem.Click += delegate
         {
             RenameTool();
         };
         listBoxContextMenu.Items.Add(renameItem);
+
+        // Move Item Up
+        ToolStripMenuItem moveItemUp = new ToolStripMenuItem("Move Item Up");
+        moveItemUp.Click += delegate
+        {
+            MoveItemUp();
+        };
+        listBoxContextMenu.Items.Add(moveItemUp);
+
+        // Move Item Down
+        ToolStripMenuItem moveItemDown = new ToolStripMenuItem("Move Item Down");
+        moveItemDown.Click += delegate
+        {
+            MoveItemDown();
+        };
+        listBoxContextMenu.Items.Add(moveItemDown);
+
         listBox1.ContextMenuStrip = listBoxContextMenu;
         listBox1.MouseDown += listBox1_MouseDown;
     }
 
-    private void RenameTool()
+
+
+
+    // Declare history stack
+    private Stack<Tuple<int, string, string>> pathChangesHistory = new Stack<Tuple<int, string, string>>();
+
+    private List<ScriptingTool> FilterTools(string searchText)
     {
-        if (listBox1.SelectedIndex != -1)
+        return tools
+            .Where(tool => tool.Name.ToLower().Contains(searchText))
+            .ToList();
+    }
+
+
+
+    private void EditPath()
+    {
+        // Get the selected index from the ListBox
+        int selectedIndex = listBox1.SelectedIndex;
+
+        // Check if the selected index is within the valid range of filteredTools
+        if (selectedIndex >= 0 && selectedIndex < filteredTools.Count)
         {
-            int selectedIndex = listBox1.SelectedIndex;
-            string currentName = tools[selectedIndex].Name;
-            string newName = InputBox("Enter a new name:", "Rename Tool", currentName);
-            if (!string.IsNullOrEmpty(newName))
+            // Retrieve the selected tool from filteredTools
+            ScriptingTool selectedTool = filteredTools[selectedIndex];
+
+            // Example: Use InputBox or any other UI element to get the new path
+            string currentPath = selectedTool.Path;
+            string newPath = Interaction.InputBox("Enter the new path:", "Edit Path", currentPath);
+
+            // Check if the new path is not empty or null
+            if (!string.IsNullOrWhiteSpace(newPath))
             {
-                renamedToolsHistory.Push(new Tuple<int, string>(selectedIndex, currentName));
-                tools[selectedIndex].Name = newName;
-                SaveToolsToConfig();
-                UpdateListBox();
+                // Push the current state into the history stack
+                pathChangesHistory.Push(new Tuple<int, string, string>(selectedIndex, currentPath, newPath));
+
+                // Update the tool's path
+                selectedTool.Path = newPath;
+
+                // Reapply the search if there is text in the search TextBox
+                if (!string.IsNullOrWhiteSpace(textBox1.Text))
+                {
+                    PerformSearch();
+                }
+                else
+                {
+                    // Update the display in listBox1 with the filtered tools
+                    UpdateListBox(filteredTools);
+                }
             }
         }
     }
+
+
+
+
+
+    private void UpdateListBoxForSearch(List<ScriptingTool> items)
+    {
+        listBox1.Items.Clear();
+
+        foreach (ScriptingTool tool in items)
+        {
+            listBox1.Items.Add(tool.Name);
+        }
+    }
+
+
+
+ private void RenameTool()
+{
+    // Get the selected index from the ListBox
+    int selectedIndex = listBox1.SelectedIndex;
+
+    // Check if the selected index is within the valid range of filteredTools
+    if (selectedIndex >= 0 && selectedIndex < filteredTools.Count)
+    {
+        // Retrieve the selected tool from filteredTools
+        ScriptingTool selectedTool = filteredTools[selectedIndex];
+
+        // Get the current name of the tool
+        string currentName = selectedTool.Name;
+
+        // Use InputBox or any other UI element to get the new name
+        string newName = Interaction.InputBox("Enter a new name:", "Rename Tool", currentName);
+
+        // Check if the new name is not empty or null
+        if (!string.IsNullOrEmpty(newName))
+        {
+            // Push the current state into the history stack
+            renamedToolsHistory.Push(new Tuple<int, string>(selectedIndex, currentName));
+
+            // Update the tool's name
+            selectedTool.Name = newName;
+
+            // Save the updated tools to the configuration file
+            SaveToolsToConfig();
+
+            // Update the display in listBox1 with the filtered tools
+            UpdateListBox(filteredTools);
+        }
+    }
+}
+
+
+
+
+
 
     public static string InputBox(string prompt, string title, string defaultValue = "")
     {
@@ -270,7 +520,9 @@ private void ExploreNewTools()
         {
             return;
         }
+
         ScriptingTool selectedTool = tools[selectedIndex];
+
         try
         {
             Uri uri;
@@ -313,6 +565,17 @@ private void ExploreNewTools()
                     CreateNoWindow = false
                 });
             }
+            else if (selectedTool.Path.EndsWith(".jar", StringComparison.OrdinalIgnoreCase))
+            {
+                // Assuming 'java.exe' is in the system's PATH
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = "java.exe",
+                    Arguments = $"-jar \"{selectedTool.Path}\"",
+                    WorkingDirectory = Path.GetDirectoryName(selectedTool.Path),
+                    CreateNoWindow = false
+                });
+            }
             else if (Uri.TryCreate(selectedTool.Path, UriKind.Absolute, out uri) && uri.Scheme.StartsWith("http", StringComparison.OrdinalIgnoreCase))
             {
                 Process.Start(new ProcessStartInfo
@@ -320,6 +583,18 @@ private void ExploreNewTools()
                     FileName = selectedTool.Path,
                     UseShellExecute = true
                 });
+            }
+            else if (selectedTool.Path.EndsWith(".docx", StringComparison.OrdinalIgnoreCase) ||
+                     selectedTool.Path.EndsWith(".md", StringComparison.OrdinalIgnoreCase) ||
+                     selectedTool.Path.EndsWith(".txt", StringComparison.OrdinalIgnoreCase) ||
+                     selectedTool.Path.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase))
+            {
+                // Open document and PDF files with the default associated application
+                ShellExecute(0, "open", selectedTool.Path, "", "", 1);
+            }
+            else if (Directory.Exists(selectedTool.Path)) // Check if it's a directory
+            {
+                Process.Start("explorer.exe", selectedTool.Path);
             }
             else
             {
@@ -331,6 +606,7 @@ private void ExploreNewTools()
             MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Hand);
         }
     }
+
 
     [DllImport("shell32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
     private static extern nint ShellExecute(nint hwnd, string lpOperation, string lpFile, string lpParameters, string lpDirectory, int nShowCmd);
@@ -344,22 +620,41 @@ private void ExploreNewTools()
         ContextMenuStrip contextMenu = new ContextMenuStrip();
         ToolStripMenuItem addWebsiteToolItem = new ToolStripMenuItem("Add Website (URL)");
         ToolStripMenuItem addScriptToolItem = new ToolStripMenuItem("Add Script (.ps1, .bat, .py)");
-        ToolStripMenuItem addExecutableToolItem = new ToolStripMenuItem("Add Program (.exe)");
+        ToolStripMenuItem addExecutableToolItem = new ToolStripMenuItem("Add Program (.exe, .jar)");
+        ToolStripMenuItem addDocumentToolItem = new ToolStripMenuItem("Add Document (.docx, .md, .txt, .pdf)");
+        ToolStripMenuItem addFolderPathToolItem = new ToolStripMenuItem("Add Folder Path");
+
         addWebsiteToolItem.Click += delegate
         {
             AddTool("Website");
         };
+
         addScriptToolItem.Click += delegate
         {
             AddTool("Script");
         };
+
         addExecutableToolItem.Click += delegate
         {
             AddTool("Executable");
         };
+
+        addDocumentToolItem.Click += delegate
+        {
+            AddTool("Document");
+        };
+
+        addFolderPathToolItem.Click += delegate
+        {
+            AddTool("Folder");
+        };
+
         contextMenu.Items.Add(addWebsiteToolItem);
         contextMenu.Items.Add(addScriptToolItem);
         contextMenu.Items.Add(addExecutableToolItem);
+        contextMenu.Items.Add(addDocumentToolItem);
+        contextMenu.Items.Add(addFolderPathToolItem);
+
         button3.ContextMenuStrip = contextMenu;
         button3.ContextMenuStrip.Show(button3, new Point(0, button3.Height));
     }
@@ -406,7 +701,7 @@ private void ExploreNewTools()
                     OpenFileDialog openFileDialog = new OpenFileDialog
                     {
                         Title = "Select Executable File",
-                        Filter = "Executable files (*.exe)|*.exe",
+                        Filter = "Executable files (*.exe;*.jar)|*.exe;*.jar",
                         InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles)
                     };
                     if (openFileDialog.ShowDialog() == DialogResult.OK)
@@ -420,8 +715,53 @@ private void ExploreNewTools()
                     }
                     break;
                 }
+
+            case "Document":
+                {
+                    OpenFileDialog openFileDialog = new OpenFileDialog
+                    {
+                        Title = "Select Document File",
+                        Filter = "Document files (*.docx;*.md;*.txt;*.pdf)|*.docx;*.md;*.txt;*.pdf",
+                        InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Personal)
+                    };
+                    if (openFileDialog.ShowDialog() == DialogResult.OK)
+                    {
+                        string toolName = Interaction.InputBox("Enter a name for the tool (optional):", "Enter Name", openFileDialog.SafeFileName);
+                        if (string.IsNullOrWhiteSpace(toolName))
+                        {
+                            toolName = Path.GetFileNameWithoutExtension(openFileDialog.FileName);
+                        }
+
+                        // Add the tool to the list (or perform any other necessary actions)
+                        AddToolToList(new ScriptingTool(toolName, openFileDialog.FileName, ""));
+                    }
+                    break;
+                }
+            case "Folder":
+                {
+                    FolderBrowserDialog folderBrowserDialog = new FolderBrowserDialog
+                    {
+                        Description = "Select Folder",
+                        RootFolder = Environment.SpecialFolder.MyComputer
+                    };
+
+                    if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
+                    {
+                        string folderPath = folderBrowserDialog.SelectedPath;
+
+                        string toolNameForFolder = Interaction.InputBox("Enter a name for the tool (optional):", "Enter Name", folderPath);
+                        if (string.IsNullOrWhiteSpace(toolNameForFolder))
+                        {
+                            toolNameForFolder = new DirectoryInfo(folderPath).Name;
+                        }
+
+                        AddToolToList(new ScriptingTool(toolNameForFolder, folderPath, ""));
+                    }
+                    break;
+                }
         }
     }
+
 
     public void AddToolToList(ScriptingTool tool)
     {
@@ -442,43 +782,128 @@ private void ExploreNewTools()
         }
     }
 
+    private List<ScriptingTool> originalOrderTools = new List<ScriptingTool>();
+
     private void LoadToolsFromConfig()
     {
         if (!File.Exists(configPath))
         {
             return;
         }
+
         tools.Clear();
+        originalOrderTools.Clear();
+
         using (StreamReader reader = new StreamReader(configPath))
         {
             while (!reader.EndOfStream)
             {
-                string line = reader.ReadLine().Trim();
-                if (line.StartsWith("[") && line.EndsWith("]"))
+                string line = reader.ReadLine()?.Trim();
+                if (line != null && line.StartsWith("[") && line.EndsWith("]"))
                 {
                     string toolName = line.Substring(1, line.Length - 2);
                     string pathLine = reader.ReadLine()?.Trim();
                     string customFlagsLine = reader.ReadLine()?.Trim();
+
                     if (pathLine != null && customFlagsLine != null && pathLine.StartsWith("path=") && customFlagsLine.StartsWith("custom_flags="))
                     {
                         string path = pathLine.Substring("path=".Length);
                         string customFlags = customFlagsLine.Substring("custom_flags=".Length);
-                        tools.Add(new ScriptingTool(toolName, path, customFlags));
+                        ScriptingTool tool = new ScriptingTool(toolName, path, customFlags);
+
+                        // Add to both the tools list and the original order list
+                        tools.Add(tool);
+                        originalOrderTools.Add(tool);
                     }
                 }
             }
         }
-        UpdateListBox();
+
+        // Ensure filteredTools is initialized with all tools
+        filteredTools = new List<ScriptingTool>(originalOrderTools);
+
+        UpdateListBox();  // Update the display with the initial tools
     }
 
-    private void UpdateListBox()
+
+
+    private void UpdateListBox(List<ScriptingTool> items = null)
     {
         listBox1.Items.Clear();
-        foreach (ScriptingTool tool in tools)
+
+        List<ScriptingTool> toolsToDisplay = items ?? tools;
+
+        foreach (ScriptingTool tool in toolsToDisplay)
         {
             listBox1.Items.Add(tool.Name);
         }
     }
+
+
+
+
+
+
+
+    private void textBox1_TextChanged(object sender, EventArgs e)
+    {
+        PerformSearch();
+    }
+
+    private void textBox1_KeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.KeyCode == Keys.Enter)
+        {
+            PerformSearch();
+            e.SuppressKeyPress = true; // Suppress the Enter key so it doesn't add a new line in the TextBox
+        }
+        else if (e.KeyCode == Keys.Escape)
+        {
+            // Reset TextBox and remove focus
+            textBox1.Text = string.Empty;
+            textBox1.Focus();
+            e.SuppressKeyPress = true; // Suppress the Escape key
+        }
+    }
+
+    private void textBox1_LostFocus(object sender, EventArgs e)
+    {
+        // Reset TextBox when it loses focus
+        textBox1.Text = string.Empty;
+    }
+
+    private void Form1_Click(object sender, EventArgs e)
+    {
+        // Set focus to the form to remove focus from TextBox when clicking outside of it
+        this.Focus();
+    }
+
+    private Dictionary<string, string> searchResults = new Dictionary<string, string>();
+
+
+    private List<ScriptingTool> filteredTools = new List<ScriptingTool>();
+
+    private void PerformSearch()
+    {
+        string searchText = textBox1.Text.ToLower();
+
+        // Filter tools based on the entered search text
+        filteredTools = tools
+            .Where(tool => tool.Name.ToLower().Contains(searchText))
+            .ToList();
+
+        // Update the ListBox with the filtered tools for search
+        UpdateListBox(filteredTools);
+    }
+
+
+
+
+
+
+
+
+    private Dictionary<string, string> namePathDictionary = new Dictionary<string, string>();
 
     private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
     {
@@ -496,9 +921,7 @@ private void ExploreNewTools()
         }
     }
 
-    private void textBox1_TextChanged(object sender, EventArgs e)
-    {
-    }
+
 
     private void label2_Click(object sender, EventArgs e)
     {
@@ -519,125 +942,185 @@ private void ExploreNewTools()
 
     private void InitializeComponent()
     {
-        System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
-        this.button1 = new System.Windows.Forms.Button();
-        this.button3 = new System.Windows.Forms.Button();
-        this.listBox1 = new System.Windows.Forms.ListBox();
-        this.button5 = new System.Windows.Forms.Button();
-        this.label1 = new System.Windows.Forms.Label();
-        this.button6 = new System.Windows.Forms.Button();
-        this.linkLabel1 = new System.Windows.Forms.LinkLabel();
-        this.linkLabel2 = new System.Windows.Forms.LinkLabel();
-        this.label2 = new System.Windows.Forms.Label();
-        this.label3 = new System.Windows.Forms.Label();
-        this.label4 = new System.Windows.Forms.Label();
-        base.SuspendLayout();
-        this.button1.Location = new System.Drawing.Point(12, 241);
-        this.button1.Name = "button1";
-        this.button1.Size = new System.Drawing.Size(215, 28);
-        this.button1.TabIndex = 0;
-        this.button1.Text = "Launch Tool";
-        this.button1.UseVisualStyleBackColor = true;
-        this.button1.Click += new System.EventHandler(button1_Click);
-        this.button3.Location = new System.Drawing.Point(123, 195);
-        this.button3.Name = "button3";
-        this.button3.Size = new System.Drawing.Size(49, 24);
-        this.button3.TabIndex = 2;
-        this.button3.Text = "+";
-        this.button3.UseVisualStyleBackColor = true;
-        this.button3.Click += new System.EventHandler(button3_Click);
-        this.listBox1.FormattingEnabled = true;
-        this.listBox1.ItemHeight = 15;
-        this.listBox1.Location = new System.Drawing.Point(12, 80);
-        this.listBox1.Name = "listBox1";
-        this.listBox1.Size = new System.Drawing.Size(215, 109);
-        this.listBox1.TabIndex = 4;
-        this.listBox1.SelectedIndexChanged += new System.EventHandler(listBox1_SelectedIndexChanged);
-        this.button5.Location = new System.Drawing.Point(12, 195);
-        this.button5.Name = "button5";
-        this.button5.Size = new System.Drawing.Size(79, 23);
-        this.button5.TabIndex = 6;
-        this.button5.Text = "Settings";
-        this.button5.UseVisualStyleBackColor = true;
-        this.button5.Click += new System.EventHandler(button5_Click);
-        this.label1.AutoSize = true;
-        this.label1.Font = new System.Drawing.Font("Segoe UI", 9f, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, 0);
-        this.label1.Location = new System.Drawing.Point(12, 62);
-        this.label1.Name = "label1";
-        this.label1.Size = new System.Drawing.Size(51, 15);
-        this.label1.TabIndex = 7;
-        this.label1.Text = "Toolbox";
-        this.button6.Location = new System.Drawing.Point(178, 195);
-        this.button6.Name = "button6";
-        this.button6.Size = new System.Drawing.Size(49, 24);
-        this.button6.TabIndex = 8;
-        this.button6.Text = "-";
-        this.button6.UseVisualStyleBackColor = true;
-        this.button6.Click += new System.EventHandler(button6_Click);
-        this.linkLabel1.AutoSize = true;
-        this.linkLabel1.Location = new System.Drawing.Point(141, 283);
-        this.linkLabel1.Name = "linkLabel1";
-        this.linkLabel1.Size = new System.Drawing.Size(31, 15);
-        this.linkLabel1.TabIndex = 9;
-        this.linkLabel1.TabStop = true;
-        this.linkLabel1.Text = "Blog";
-        this.linkLabel1.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(linkLabel1_LinkClicked);
-        this.linkLabel2.AutoSize = true;
-        this.linkLabel2.Location = new System.Drawing.Point(182, 283);
-        this.linkLabel2.Name = "linkLabel2";
-        this.linkLabel2.Size = new System.Drawing.Size(45, 15);
-        this.linkLabel2.TabIndex = 10;
-        this.linkLabel2.TabStop = true;
-        this.linkLabel2.Text = "Donate";
-        this.linkLabel2.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(linkLabel2_LinkClicked);
-        this.label2.AutoSize = true;
-        this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 15f, System.Drawing.FontStyle.Bold);
-        this.label2.Location = new System.Drawing.Point(48, 9);
-        this.label2.Name = "label2";
-        this.label2.Size = new System.Drawing.Size(142, 25);
-        this.label2.TabIndex = 14;
-        this.label2.Text = "Task Runway";
-        this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-        this.label2.Click += new System.EventHandler(label2_Click_1);
-        this.label3.AutoSize = true;
-        this.label3.Font = new System.Drawing.Font("Segoe UI", 9f, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, 0);
-        this.label3.Location = new System.Drawing.Point(12, 283);
-        this.label3.Name = "label3";
-        this.label3.Size = new System.Drawing.Size(96, 15);
-        this.label3.TabIndex = 15;
-        this.label3.Text = "by DavidInfosec";
-        this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-        this.label3.Click += new System.EventHandler(label3_Click_1);
-        this.label4.Font = new System.Drawing.Font("Microsoft JhengHei", 7f, System.Drawing.FontStyle.Bold);
-        this.label4.Location = new System.Drawing.Point(12, 34);
-        this.label4.Margin = new System.Windows.Forms.Padding(10, 0, 3, 0);
-        this.label4.Name = "label4";
-        this.label4.Size = new System.Drawing.Size(215, 18);
-        this.label4.TabIndex = 16;
-        this.label4.Text = "Take flight into your favorite tools.";
-        this.label4.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-        this.label4.Click += new System.EventHandler(label4_Click_1);
-        base.AutoScaleDimensions = new System.Drawing.SizeF(7f, 15f);
-        base.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-        this.AutoSize = true;
-        base.ClientSize = new System.Drawing.Size(239, 311);
-        base.Controls.Add(this.label4);
-        base.Controls.Add(this.label3);
-        base.Controls.Add(this.label2);
-        base.Controls.Add(this.linkLabel2);
-        base.Controls.Add(this.linkLabel1);
-        base.Controls.Add(this.button6);
-        base.Controls.Add(this.label1);
-        base.Controls.Add(this.button5);
-        base.Controls.Add(this.listBox1);
-        base.Controls.Add(this.button3);
-        base.Controls.Add(this.button1);
-        base.Icon = (System.Drawing.Icon)resources.GetObject("$this.Icon");
-        base.Name = "Form1";
-        this.Text = "Task Runway";
-        base.Load += new System.EventHandler(Form1_Load);
-        base.ResumeLayout(false);
-        base.PerformLayout();
+        ComponentResourceManager resources = new ComponentResourceManager(typeof(Form1));
+        button1 = new Button();
+        button3 = new Button();
+        listBox1 = new ListBox();
+        button5 = new Button();
+        label1 = new Label();
+        button6 = new Button();
+        linkLabel1 = new LinkLabel();
+        linkLabel2 = new LinkLabel();
+        label2 = new Label();
+        label3 = new Label();
+        label4 = new Label();
+        label5 = new Label();
+        textBox1 = new TextBox();
+        SuspendLayout();
+        // 
+        // button1
+        // 
+        button1.Location = new Point(12, 241);
+        button1.Name = "button1";
+        button1.Size = new Size(215, 28);
+        button1.TabIndex = 0;
+        button1.Text = "Launch Tool";
+        button1.UseVisualStyleBackColor = true;
+        button1.Click += button1_Click;
+        // 
+        // button3
+        // 
+        button3.Location = new Point(123, 195);
+        button3.Name = "button3";
+        button3.Size = new Size(49, 24);
+        button3.TabIndex = 2;
+        button3.Text = "+";
+        button3.UseVisualStyleBackColor = true;
+        button3.Click += button3_Click;
+        // 
+        // listBox1
+        // 
+        listBox1.FormattingEnabled = true;
+        listBox1.ItemHeight = 15;
+        listBox1.Location = new Point(12, 80);
+        listBox1.Name = "listBox1";
+        listBox1.Size = new Size(215, 109);
+        listBox1.TabIndex = 4;
+        listBox1.SelectedIndexChanged += listBox1_SelectedIndexChanged;
+        // 
+        // button5
+        // 
+        button5.Location = new Point(12, 195);
+        button5.Name = "button5";
+        button5.Size = new Size(79, 23);
+        button5.TabIndex = 6;
+        button5.Text = "Settings";
+        button5.UseVisualStyleBackColor = true;
+        button5.Click += button5_Click;
+        // 
+        // label1
+        // 
+        label1.AutoSize = true;
+        label1.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+        label1.Location = new Point(12, 62);
+        label1.Name = "label1";
+        label1.Size = new Size(51, 15);
+        label1.TabIndex = 7;
+        label1.Text = "Toolbox";
+        // 
+        // button6
+        // 
+        button6.Location = new Point(178, 195);
+        button6.Name = "button6";
+        button6.Size = new Size(49, 24);
+        button6.TabIndex = 8;
+        button6.Text = "-";
+        button6.UseVisualStyleBackColor = true;
+        button6.Click += button6_Click;
+        // 
+        // linkLabel1
+        // 
+        linkLabel1.AutoSize = true;
+        linkLabel1.Location = new Point(141, 283);
+        linkLabel1.Name = "linkLabel1";
+        linkLabel1.Size = new Size(31, 15);
+        linkLabel1.TabIndex = 9;
+        linkLabel1.TabStop = true;
+        linkLabel1.Text = "Blog";
+        linkLabel1.LinkClicked += linkLabel1_LinkClicked;
+        // 
+        // linkLabel2
+        // 
+        linkLabel2.AutoSize = true;
+        linkLabel2.Location = new Point(182, 283);
+        linkLabel2.Name = "linkLabel2";
+        linkLabel2.Size = new Size(45, 15);
+        linkLabel2.TabIndex = 10;
+        linkLabel2.TabStop = true;
+        linkLabel2.Text = "Donate";
+        linkLabel2.LinkClicked += linkLabel2_LinkClicked;
+        // 
+        // label2
+        // 
+        label2.AutoSize = true;
+        label2.Font = new Font("Microsoft Sans Serif", 15F, FontStyle.Bold);
+        label2.Location = new Point(48, 9);
+        label2.Name = "label2";
+        label2.Size = new Size(142, 25);
+        label2.TabIndex = 14;
+        label2.Text = "Task Runway";
+        label2.TextAlign = ContentAlignment.MiddleCenter;
+        label2.Click += label2_Click_1;
+        // 
+        // label3
+        // 
+        label3.AutoSize = true;
+        label3.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+        label3.Location = new Point(12, 283);
+        label3.Name = "label3";
+        label3.Size = new Size(96, 15);
+        label3.TabIndex = 15;
+        label3.Text = "by DavidInfosec";
+        label3.TextAlign = ContentAlignment.MiddleCenter;
+        label3.Click += label3_Click_1;
+        // 
+        // label4
+        // 
+        label4.Font = new Font("Microsoft JhengHei", 7F, FontStyle.Bold);
+        label4.Location = new Point(12, 34);
+        label4.Margin = new Padding(10, 0, 3, 0);
+        label4.Name = "label4";
+        label4.Size = new Size(215, 18);
+        label4.TabIndex = 16;
+        label4.Text = "Take flight into your favorite tools.";
+        label4.TextAlign = ContentAlignment.MiddleCenter;
+        label4.Click += label4_Click_1;
+        // 
+        // label5
+        // 
+        label5.AutoSize = true;
+        label5.Font = new Font("Segoe UI", 14F);
+        label5.Location = new Point(96, 194);
+        label5.Name = "label5";
+        label5.Size = new Size(0, 25);
+        label5.TabIndex = 17;
+        // 
+        // textBox1
+        // 
+        textBox1.Font = new Font("Segoe UI", 6F);
+        textBox1.Location = new Point(110, 59);
+        textBox1.Name = "textBox1";
+        textBox1.PlaceholderText = "Search your toolbox";
+        textBox1.Size = new Size(117, 18);
+        textBox1.TabIndex = 18;
+        textBox1.TextAlign = HorizontalAlignment.Center;
+        textBox1.TextChanged += textBox1_TextChanged_1;
+        // 
+        // Form1
+        // 
+        AutoScaleDimensions = new SizeF(7F, 15F);
+        AutoScaleMode = AutoScaleMode.Font;
+        AutoSize = true;
+        ClientSize = new Size(239, 311);
+        Controls.Add(textBox1);
+        Controls.Add(label5);
+        Controls.Add(label4);
+        Controls.Add(label3);
+        Controls.Add(label2);
+        Controls.Add(linkLabel2);
+        Controls.Add(linkLabel1);
+        Controls.Add(button6);
+        Controls.Add(label1);
+        Controls.Add(button5);
+        Controls.Add(listBox1);
+        Controls.Add(button3);
+        Controls.Add(button1);
+        Icon = (Icon)resources.GetObject("$this.Icon");
+        Name = "Form1";
+        Text = "Task Runway";
+        Load += Form1_Load;
+        ResumeLayout(false);
+        PerformLayout();
     }
 
     private void CenterLabels()
@@ -675,6 +1158,15 @@ private void ExploreNewTools()
             UndoChanges();
         };
         contextMenu.Items.Add(undoItem);
+
+        ToolStripMenuItem searchbarItem = new ToolStripMenuItem("Toggle Search Bar");
+        searchbarItem.CheckOnClick = true;
+        searchbarItem.Checked = isSearchbarVisible;
+        searchbarItem.Click += delegate
+        {
+            ToggleSearchbar(searchbarItem);
+        };
+        contextMenu.Items.Add(searchbarItem);
 
         ToolStripMenuItem alwaysOnTopItem = new ToolStripMenuItem("Always On Top");
         alwaysOnTopItem.CheckOnClick = true;
@@ -752,6 +1244,25 @@ private void ExploreNewTools()
         copyMenu.DropDownItems.Add(copyFlagsItem);
 
         contextMenu.Items.Add(copyMenu);
+
+        ToolStripMenuItem sortMenu = new ToolStripMenuItem("Sort");
+
+        ToolStripMenuItem sortAscendingItem = new ToolStripMenuItem("Sort Ascending");
+        sortAscendingItem.Click += delegate
+        {
+            SortToolsAscending();
+        };
+        sortMenu.DropDownItems.Add(sortAscendingItem);
+
+        ToolStripMenuItem sortDescendingItem = new ToolStripMenuItem("Sort Descending");
+        sortDescendingItem.Click += delegate
+        {
+            SortToolsDescending();
+        };
+        sortMenu.DropDownItems.Add(sortDescendingItem);
+
+        contextMenu.Items.Add(sortMenu);
+
         contextMenu.Show(button5, new Point(0, button5.Height));
     }
 
@@ -762,7 +1273,26 @@ private void ExploreNewTools()
         item.Checked = base.TopMost;
     }
 
-    private void CustomFlags()
+    private void ToggleSearchbar(ToolStripMenuItem searchbarItem)
+    {
+        // Toggle the searchbar visibility
+        isSearchbarVisible = !isSearchbarVisible;
+
+        // Example: Assuming you have a 'textBox1' TextBox control
+        textBox1.Visible = isSearchbarVisible;
+
+        // Update the Checked state of the menu item
+        searchbarItem.Checked = isSearchbarVisible;
+
+        // Reset the search filter when search bar is toggled off
+        if (!isSearchbarVisible)
+        {
+            // Clear the search text
+            textBox1.Text = string.Empty;
+        }
+    }
+
+            private void CustomFlags()
     {
         int selectedIndex = listBox1.SelectedIndex;
         if (selectedIndex >= 0 && selectedIndex < tools.Count)
@@ -811,6 +1341,18 @@ private void ExploreNewTools()
             SaveToolsToConfig();
             UpdateListBox();
         }
+        else if (pathChangesHistory.Count > 0)
+        {
+            // Undo path change
+            Tuple<int, string, string> lastPathChange = pathChangesHistory.Pop();
+            int selectedIndexPath = lastPathChange.Item1;
+            string originalPath = lastPathChange.Item2;
+
+            // Revert the path change
+            tools[selectedIndexPath].Path = originalPath;
+            SaveToolsToConfig();
+            UpdateListBox();
+        }
         else
         {
             MessageBox.Show("No changes to undo.", "Info", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
@@ -834,18 +1376,20 @@ private void ExploreNewTools()
             MessageBox.Show("Config saved to " + selectedFilePath, "Info", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
         }
     }
-
     private void SaveToolsToConfig(string filePath)
     {
-        using StreamWriter writer = new StreamWriter(filePath);
-        foreach (ScriptingTool tool in tools)
+        using (StreamWriter writer = new StreamWriter(filePath))
         {
-            writer.WriteLine("[" + tool.Name + "]");
-            writer.WriteLine("path=" + tool.Path);
-            writer.WriteLine("custom_flags=" + tool.CustomFlags);
-            writer.WriteLine();
+            foreach (ScriptingTool tool in tools)
+            {
+                writer.WriteLine($"[{tool.Name}]");
+                writer.WriteLine($"path={tool.Path}");
+                writer.WriteLine($"custom_flags={tool.CustomFlags}");
+                writer.WriteLine();
+            }
         }
     }
+
 
     private void SaveFlags()
     {
@@ -970,5 +1514,13 @@ private void ExploreNewTools()
 
     private void label4_Click_1(object sender, EventArgs e)
     {
+    }
+
+    private Label label5;
+    private TextBox textBox1;
+
+    private void textBox1_TextChanged_1(object sender, EventArgs e)
+    {
+
     }
 }
