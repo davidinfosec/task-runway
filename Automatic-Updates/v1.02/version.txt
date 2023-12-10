@@ -1,0 +1,1 @@
+1.02=https://github.com/davidinfosec/task-runway/raw/main/Automatic-Updates/v1.02/Task_Runway_x64.exe
