@@ -9,11 +9,12 @@
 		<AssemblyName>Task_Runway_x64</AssemblyName>
 		<Company>DavidInfosec</Company>
 		<PackageIcon>app_icon.png</PackageIcon>
-		<ApplicationIcon>bin\Release\net8.0-windows\publish\win-x64\app_icon.ico</ApplicationIcon>
+		<ApplicationIcon>app_icon.ico</ApplicationIcon>
+		<ApplicationManifest>app.manifest</ApplicationManifest>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Content Include="bin\Release\net8.0-windows\publish\win-x64\app_icon.ico" />
+		<Content Include="app_icon.ico" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -32,7 +33,12 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <PackageReference Include="AngleSharp" Version="1.0.7" />
 	  <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="bin\Release\net8.0-windows\publish\win-x64\" />
 	</ItemGroup>
 
 </Project>
