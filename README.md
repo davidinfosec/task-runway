@@ -21,6 +21,7 @@
 
  #### Bug hotfixes December 10th, 2023
 - Fixed item path/edit name not mapping properly to search, sort by ascending, sort by descending, move item up, move item down.
+- Fixed some bugs with undo and refresh. Plan to fix more soon as noted in [issues.](https://github.com/davidinfosec/task-runway/issues)
 
 Task Runway is an **open-source application** designed as a central location to take flight into your favorite tools. It is developed in C#, with alternative versions in Python available.
 
