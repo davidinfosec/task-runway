@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.DirectoryServices;
 using System.Drawing;
 using System.IO;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using Microsoft.VisualBasic;
@@ -92,6 +93,7 @@ public class Form1 : Form
     public Form1()
     {
         InitializeComponent();
+        listBox1.MouseWheel += listBox1_MouseWheel;
         InitializeContextMenu();
         textBox1.TextChanged += textBox1_TextChanged;
         textBox1.KeyDown += textBox1_KeyDown;
@@ -118,11 +120,12 @@ public class Form1 : Form
         listBox1.MouseDown += listBox1_MouseDown;
     }
 
+    private Stack<List<ScriptingTool>> sortHistory = new Stack<List<ScriptingTool>>();
+    private Stack<Tuple<int, int>> moveHistory = new Stack<Tuple<int, int>>();
+
     private void SortToolsAscending()
     {
-        // Retrieve the selected tool from filteredTools
-        int selectedIndex = listBox1.SelectedIndex;
-        ScriptingTool selectedTool = (selectedIndex >= 0 && selectedIndex < filteredTools.Count) ? filteredTools[selectedIndex] : null;
+        SaveSortState();  // Save the state before sorting
 
         // Implement logic to sort originalOrderTools in ascending order
         originalOrderTools = originalOrderTools.OrderBy(tool => tool.Name).ToList();
@@ -130,6 +133,9 @@ public class Form1 : Form
         // Update the tools list based on the sorted originalOrderTools
         tools = new List<ScriptingTool>(originalOrderTools);
 
+        // Save the sorted order to config
+        SaveToolsToConfig();
+
         // Update the filteredTools list if a search is active
         if (!string.IsNullOrWhiteSpace(textBox1.Text))
         {
@@ -141,16 +147,11 @@ public class Form1 : Form
             // Explicitly update filteredTools based on the sorted tools list
             filteredTools = new List<ScriptingTool>(tools);
         }
-
-        // Restore the selected index after the update
-        listBox1.SelectedIndex = (selectedTool != null) ? tools.IndexOf(selectedTool) : -1;
     }
 
     private void SortToolsDescending()
     {
-        // Retrieve the selected tool from filteredTools
-        int selectedIndex = listBox1.SelectedIndex;
-        ScriptingTool selectedTool = (selectedIndex >= 0 && selectedIndex < filteredTools.Count) ? filteredTools[selectedIndex] : null;
+        SaveSortState();  // Save the state before sorting
 
         // Implement logic to sort originalOrderTools in descending order
         originalOrderTools = originalOrderTools.OrderByDescending(tool => tool.Name).ToList();
@@ -158,6 +159,9 @@ public class Form1 : Form
         // Update the tools list based on the sorted originalOrderTools
         tools = new List<ScriptingTool>(originalOrderTools);
 
+        // Save the sorted order to config
+        SaveToolsToConfig();
+
         // Update the filteredTools list if a search is active
         if (!string.IsNullOrWhiteSpace(textBox1.Text))
         {
@@ -169,64 +173,65 @@ public class Form1 : Form
             // Explicitly update filteredTools based on the sorted tools list
             filteredTools = new List<ScriptingTool>(tools);
         }
-
-        // Restore the selected index after the update
-        listBox1.SelectedIndex = (selectedTool != null) ? tools.IndexOf(selectedTool) : -1;
     }
 
-
-
+    private void SaveSortState()
+    {
+        sortHistory.Push(new List<ScriptingTool>(tools));
+    }
 
     private void MoveItemUp()
     {
         int selectedIndex = listBox1.SelectedIndex;
-        if (selectedIndex > 0)
-        {
-            // Retrieve the selected tool from filteredTools
-            ScriptingTool selectedTool = filteredTools[selectedIndex];
-
-            // Swap the selected item with the one above it
-            SwapItemsInList(tools, selectedIndex, selectedIndex - 1);
-            SwapItemsInList(originalOrderTools, selectedIndex, selectedIndex - 1);
-            SwapItemsInList(filteredTools, selectedIndex, selectedIndex - 1);
-
-            // Update the display in the listBox
-            UpdateListBox();
-
-            // Update the selected index after the swap
-            listBox1.SelectedIndex = selectedIndex - 1;
-        }
+        MoveItem(selectedIndex, -1);
     }
 
     private void MoveItemDown()
     {
         int selectedIndex = listBox1.SelectedIndex;
-        if (selectedIndex < listBox1.Items.Count - 1 && selectedIndex != -1)
-        {
-            // Retrieve the selected tool from filteredTools
-            ScriptingTool selectedTool = filteredTools[selectedIndex];
+        MoveItem(selectedIndex, 1);
+    }
 
-            // Swap the selected item with the one below it
-            SwapItemsInList(tools, selectedIndex, selectedIndex + 1);
-            SwapItemsInList(originalOrderTools, selectedIndex, selectedIndex + 1);
-            SwapItemsInList(filteredTools, selectedIndex, selectedIndex + 1);
+
+    private void MoveItem(int selectedIndex, int direction)
+    {
+        int newIndex = selectedIndex + direction;
+
+        if (newIndex >= 0 && newIndex < filteredTools.Count)
+        {
+            // Swap the selected item with the one above or below it
+            SwapItemsInList(tools, selectedIndex, newIndex);
+            SwapItemsInList(originalOrderTools, selectedIndex, newIndex);
+            SwapItemsInList(filteredTools, selectedIndex, newIndex);
 
             // Update the display in the listBox
             UpdateListBox();
 
             // Update the selected index after the swap
-            listBox1.SelectedIndex = selectedIndex + 1;
+            listBox1.SelectedIndex = newIndex;
+
+            // Save the move to the history stack
+            moveHistory.Push(new Tuple<int, int>(selectedIndex, newIndex));
+
+            // Save the tools to the configuration
+            SaveToolsToConfig();
         }
     }
+
+
 
 
     // Helper method to swap items in a list
     private void SwapItemsInList<T>(List<T> list, int index1, int index2)
     {
-        T temp = list[index1];
-        list[index1] = list[index2];
-        list[index2] = temp;
+        if (index1 >= 0 && index1 < list.Count && index2 >= 0 && index2 < list.Count)
+        {
+            T temp = list[index1];
+            list[index1] = list[index2];
+            list[index2] = temp;
+        }
     }
+
 
 
 
@@ -337,43 +342,47 @@ public class Form1 : Form
 
 
 
-    private void EditPath()
+  private void EditPath()
+{
+    // Get the selected index from the ListBox
+    int selectedIndex = listBox1.SelectedIndex;
+
+    // Check if the selected index is within the valid range of filteredTools
+    if (selectedIndex >= 0 && selectedIndex < filteredTools.Count)
     {
-        // Get the selected index from the ListBox
-        int selectedIndex = listBox1.SelectedIndex;
+        // Retrieve the selected tool from filteredTools
+        ScriptingTool selectedTool = filteredTools[selectedIndex];
 
-        // Check if the selected index is within the valid range of filteredTools
-        if (selectedIndex >= 0 && selectedIndex < filteredTools.Count)
+        // Example: Use InputBox or any other UI element to get the new path
+        string currentPath = selectedTool.Path;
+        string newPath = Interaction.InputBox("Enter the new path:", "Edit Path", currentPath);
+
+        // Check if the new path is not empty or null
+        if (!string.IsNullOrWhiteSpace(newPath))
         {
-            // Retrieve the selected tool from filteredTools
-            ScriptingTool selectedTool = filteredTools[selectedIndex];
+            // Push the current state into the history stack
+            pathChangesHistory.Push(new Tuple<int, string, string>(selectedIndex, currentPath, newPath));
 
-            // Example: Use InputBox or any other UI element to get the new path
-            string currentPath = selectedTool.Path;
-            string newPath = Interaction.InputBox("Enter the new path:", "Edit Path", currentPath);
+            // Update the tool's path
+            selectedTool.Path = newPath;
 
-            // Check if the new path is not empty or null
-            if (!string.IsNullOrWhiteSpace(newPath))
+            // Save the changes to the configuration
+            SaveToolsToConfig();
+
+            // Reapply the search if there is text in the search TextBox
+            if (!string.IsNullOrWhiteSpace(textBox1.Text))
             {
-                // Push the current state into the history stack
-                pathChangesHistory.Push(new Tuple<int, string, string>(selectedIndex, currentPath, newPath));
-
-                // Update the tool's path
-                selectedTool.Path = newPath;
-
-                // Reapply the search if there is text in the search TextBox
-                if (!string.IsNullOrWhiteSpace(textBox1.Text))
-                {
-                    PerformSearch();
-                }
-                else
-                {
-                    // Update the display in listBox1 with the filtered tools
-                    UpdateListBox(filteredTools);
-                }
+                PerformSearch();
+            }
+            else
+            {
+                // Update the display in listBox1 with the filtered tools
+                UpdateListBox(filteredTools);
             }
         }
     }
+}
+
 
 
 
@@ -511,17 +520,81 @@ public class Form1 : Form
             LaunchSelectedTool();
             e.Handled = true;
         }
+        else if (e.Control && (e.KeyCode == Keys.Up || e.KeyCode == Keys.Down))
+        {
+            int selectedIndex = listBox1.SelectedIndex;
+            int direction = (e.KeyCode == Keys.Up) ? -1 : 1;
+            MoveItem(selectedIndex, direction);
+            e.Handled = true;
+        }
     }
+
+
+    private int originalMoveIndex; // Add this variable at the class level
+
+    private void listBox1_MouseWheel(object sender, MouseEventArgs e)
+    {
+        // Check if the Ctrl key is held down
+        if (Control.ModifierKeys == Keys.Control)
+        {
+            // Determine the direction of the scroll (up or down)
+            int direction = (e.Delta > 0) ? -1 : 1;
+
+            // Move the selected item based on the direction
+            MoveItem(listBox1.SelectedIndex, direction, true);
+
+            // Prevent the default scrolling behavior
+            ((HandledMouseEventArgs)e).Handled = true;
+        }
+    }
+
+    private void MoveItem(int selectedIndex, int direction, bool recordOriginalIndex = false)
+    {
+        int newIndex = selectedIndex + direction;
+
+        if (newIndex >= 0 && newIndex < filteredTools.Count)
+        {
+            // Record the original index only if specified
+            if (recordOriginalIndex)
+            {
+                originalMoveIndex = selectedIndex;
+            }
+
+            // Swap the selected item with the one above or below it
+            SwapItemsInList(tools, selectedIndex, newIndex);
+            SwapItemsInList(originalOrderTools, selectedIndex, newIndex);
+            SwapItemsInList(filteredTools, selectedIndex, newIndex);
+
+            // Update the display in the listBox
+            UpdateListBox();
+
+            // Update the selected index after the swap
+            listBox1.SelectedIndex = newIndex;
+
+            // Save the move to the history stack
+            moveHistory.Push(new Tuple<int, int>(originalMoveIndex, newIndex));
+
+            // Save the tools to the configuration
+            SaveToolsToConfig();
+        }
+    }
+
+
+
+
+
+
+
 
     private void LaunchSelectedTool()
     {
         int selectedIndex = listBox1.SelectedIndex;
-        if (selectedIndex < 0 || selectedIndex >= tools.Count)
+        if (selectedIndex < 0 || selectedIndex >= filteredTools.Count)
         {
             return;
         }
 
-        ScriptingTool selectedTool = tools[selectedIndex];
+        ScriptingTool selectedTool = filteredTools[selectedIndex];
 
         try
         {
@@ -762,25 +835,31 @@ public class Form1 : Form
         }
     }
 
-
     public void AddToolToList(ScriptingTool tool)
     {
         tools.Add(tool);
-        SaveToolsToConfig();
+        originalOrderTools.Add(tool); // Add the new tool to originalOrderTools as well
+        SaveToolsToConfig(); // Save the tools to the configuration file immediately after adding a new tool
         UpdateListBox();
     }
 
+
     private void SaveToolsToConfig()
     {
-        using StreamWriter writer = new StreamWriter(configPath);
-        foreach (ScriptingTool tool in tools)
+        using (StreamWriter writer = new StreamWriter(configPath))
         {
-            writer.WriteLine("[" + tool.Name + "]");
-            writer.WriteLine("path=" + tool.Path);
-            writer.WriteLine("custom_flags=" + tool.CustomFlags);
-            writer.WriteLine();
+            foreach (ScriptingTool tool in originalOrderTools)
+            {
+                writer.WriteLine("[" + tool.Name + "]");
+                writer.WriteLine("path=" + tool.Path);
+                writer.WriteLine("custom_flags=" + tool.CustomFlags);
+                writer.WriteLine();
+            }
         }
     }
+
+
+
 
     private List<ScriptingTool> originalOrderTools = new List<ScriptingTool>();
 
@@ -1329,8 +1408,6 @@ public class Form1 : Form
             ScriptingTool restoredTool = deletedTools[deletedTools.Count - 1];
             deletedTools.RemoveAt(deletedTools.Count - 1);
             tools.Add(restoredTool);
-            SaveToolsToConfig();
-            UpdateListBox();
         }
         else if (renamedToolsHistory.Count > 0)
         {
@@ -1338,8 +1415,6 @@ public class Form1 : Form
             int index = lastRename.Item1;
             string oldName = lastRename.Item2;
             tools[index].Name = oldName;
-            SaveToolsToConfig();
-            UpdateListBox();
         }
         else if (pathChangesHistory.Count > 0)
         {
@@ -1350,14 +1425,44 @@ public class Form1 : Form
 
             // Revert the path change
             tools[selectedIndexPath].Path = originalPath;
-            SaveToolsToConfig();
+        }
+        else if (moveHistory.Count > 0)
+        {
+            // Undo Move
+            Tuple<int, int> lastMove = moveHistory.Pop();
+            int selectedIndex = lastMove.Item1;
+            int newIndex = lastMove.Item2;
+
+            // Swap the items back to undo the move
+            SwapItemsInList(tools, selectedIndex, newIndex);
+            SwapItemsInList(originalOrderTools, selectedIndex, newIndex);
+            SwapItemsInList(filteredTools, selectedIndex, newIndex);
+
+            // Update the display in the listBox
             UpdateListBox();
+
+            // Update the selected index after the undo
+            listBox1.SelectedIndex = selectedIndex;
+
+            // Save the tools to the configuration
+            SaveToolsToConfig();
         }
         else
         {
             MessageBox.Show("No changes to undo.", "Info", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
+            return;  // No changes to apply, return early
         }
+
+        // Save the changes to config and update the display
+        SaveToolsToConfig();
+        UpdateListBox();
     }
+
+
+
+
+
+
 
     private void SaveConfig()
     {
