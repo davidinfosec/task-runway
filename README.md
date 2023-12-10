@@ -19,6 +19,9 @@
 - **Expanded File Format Support**
    - Added support for Markdown (.md), Text (.txt), Java Archive (.jar), Word Document (.docx), and empty folders.
 
+#### Experimental:
+- Attempting to get Auto Updates working, thank you for your patience as this is a early development. Updates are still mainly manual, so be sure to check back here. My hope is to get fully automated updates working soon!
+
  #### Bug hotfixes December 10th, 2023
 - Fixed item path/edit name not mapping properly to search, sort by ascending, sort by descending, move item up, move item down.
 - Fixed some bugs with undo and refresh. Plan to fix more soon as noted in [issues.](https://github.com/davidinfosec/task-runway/issues)
