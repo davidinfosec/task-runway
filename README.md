@@ -33,7 +33,8 @@ The C# version of Task Runway is a very light-weight executable, only 1.17MB, of
 
 Task Runway supports scripts, executables, and websites. Simply add your desired tool to the list, and it will populate in a list box for easy access.
 
-![firefox_zTveyOccIx](https://github.com/davidinfosec/task-runway/assets/87215831/57e4fb4c-40d6-44c2-862e-7b78b707c93f)
+![transparent](https://github.com/davidinfosec/task-runway/assets/87215831/44f17dbf-4355-44e1-89ee-334502214344)
+
 
 Task Runway is tiny, but powerful.
 
