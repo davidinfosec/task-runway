@@ -10,7 +10,7 @@ As efforts to support the development and support of Task Runway, a [$10 donatio
 ## Task Runway v1.0.4 Release: .lnk and file:/// support, improved management of resources 
 
 **This update's notable changes:**
-- icon file no longer required to launch (was a bug)
+- icon file no longer required to launch (bug)
 - Fixed item position in list box on removal.
 - Corrected undo behavior for item order.
 - Improved undo logic for multiple functions.
