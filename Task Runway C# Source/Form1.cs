@@ -1,4 +1,4 @@
-﻿// Task_Runway_x64, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+﻿// Task_Runway_x64, Version=1.0.2, Culture=neutral, PublicKeyToken=null
 // Form1
 using System;
 using System.Collections;
@@ -8,15 +8,26 @@ using System.Diagnostics;
 using System.DirectoryServices;
 using System.Drawing;
 using System.IO;
+using System.Net;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using Microsoft.VisualBasic;
 using TaskRunway;
+using UpdaterApp;
+
 
 public class Form1 : Form
 {
+    private Version currentVersion;
+
+    private string downloadLink;
+
+    private bool isManualCheck = false;
+
+
     private bool isSearchbarVisible = true;
+
     public class ExploreToolsForm : Form
     {
         public ExploreToolsForm()
@@ -25,7 +36,7 @@ public class Form1 : Form
         }
     }
 
-    public class ScriptingTool
+public class ScriptingTool
     {
         public string Name { get; set; }
 
@@ -93,18 +104,174 @@ public class Form1 : Form
     public Form1()
     {
         InitializeComponent();
-        listBox1.MouseWheel += listBox1_MouseWheel;
+        currentVersion = new Version("1.0.2");
         InitializeContextMenu();
         textBox1.TextChanged += textBox1_TextChanged;
         textBox1.KeyDown += textBox1_KeyDown;
-        string relativeIconPath = Path.Combine(Application.StartupPath, "app_icon.ico");
-        base.Icon = new Icon(relativeIconPath);
         LoadToolsFromConfig();
         base.MaximizeBox = false;
         base.MinimizeBox = true;
         base.FormBorderStyle = FormBorderStyle.FixedSingle;
         listBox1.KeyDown += listBox1_KeyDown;
     }
+
+
+
+
+    private async Task<(string status, string downloadLink, string version)> GetUpdateStatus()
+    {
+        // Replace this URL with the actual URL of your version.txt file on the server
+        var versionFileUrl = "https://raw.githubusercontent.com/davidinfosec/task-runway/main/version.txt";
+        var tempVersionFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "versioncheck.txt");
+
+        try
+        {
+            using (var httpClient = new HttpClient())
+            using (var responseStream = await httpClient.GetStreamAsync(new Uri(versionFileUrl)))
+            using (var fileStream = File.Create(tempVersionFile))
+            {
+                await responseStream.CopyToAsync(fileStream);
+            }
+        }
+        catch (Exception)
+        {
+            return ("error", null, null);
+        }
+
+        if (File.Exists(tempVersionFile))
+        {
+            string[] versionFileLines = File.ReadAllLines(tempVersionFile);
+
+            if (versionFileLines.Length > 0)
+            {
+                string versionLine = versionFileLines[0]; // Get the first line
+                var versionParts = versionLine.Split('=');
+
+                if (versionParts.Length == 2)
+                {
+                    string version = versionParts[0].Trim();
+                    string newDownloadLink = versionParts[1].Trim();
+
+                    Console.WriteLine($"Extracted version: {version}"); // Add this line for debugging
+
+                    if (IsUpdateNeeded(version))
+                    {
+                        return ("needs_update", newDownloadLink, version);
+                    }
+                    else
+                    {
+                        return ("updated", null, version);
+                    }
+                }
+            }
+        }
+
+        return ("error", null, null);
+    }
+
+    private bool IsUpdateNeeded(string newVersion)
+    {
+        try
+        {
+            // Parse the version number from the newVersion string in version.txt
+            Version latestVersion = new Version(newVersion);
+
+            // Use the currentVersion variable
+            return currentVersion < latestVersion;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+    }
+
+
+
+    private void ShowUpdateForm(string version)
+    {
+        var updateForm = new Update();
+
+        updateForm.OnViewChanges = () => ViewChangelog();
+        updateForm.OnUpdateNow = () => UpdateNow();
+
+        updateForm.ShowDialog();
+    }
+
+    private void ViewChangelog()
+    {
+        // Open URL for changelog
+        Process.Start(new ProcessStartInfo
+        {
+            FileName = "https://TaskRunway.com/release",
+            UseShellExecute = true
+        });
+    }
+
+    private void UpdateNow()
+    {
+        if (downloadLink != null)
+        {
+            try
+            {
+                Console.WriteLine("Starting updater application...");
+                Process.Start("UpdaterApp.exe");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"An error occurred during the update: {ex.Message}", "Update Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+    }
+
+    private void Form1_Load(object sender, EventArgs e)
+    {
+        LoadAsync(); // Call the asynchronous method
+    }
+
+    private async void LoadAsync()
+    {
+        await CheckForUpdates(); // Automatic check on load
+    }
+
+    private void checkForUpdatesMenuItem_Click(object sender, EventArgs e)
+    {
+        CheckForUpdates(isManualCheck: true); // Manual check
+    }
+
+    private async Task CheckForUpdates(bool isManualCheck = false)
+    {
+        var (status, newDownloadLink, version) = await GetUpdateStatus();
+
+        if (status == "needs_update")
+        {
+            this.downloadLink = newDownloadLink;
+            ShowUpdateForm(version);
+        }
+        else if (status == "updated" && isManualCheck)
+        {
+            MessageBox.Show($"You are up to date! ({currentVersion})", "Up to Date", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+        // Handle the 'error' case as needed
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     public void RemoveToolFromList(ScriptingTool tool)
     {
@@ -114,11 +281,7 @@ public class Form1 : Form
         }
     }
 
-    private void Form1_Load(object sender, EventArgs e)
-    {
-        listBox1.ContextMenuStrip = listBoxContextMenu;
-        listBox1.MouseDown += listBox1_MouseDown;
-    }
+
 
     private Stack<List<ScriptingTool>> sortHistory = new Stack<List<ScriptingTool>>();
     private Stack<Tuple<int, int>> moveHistory = new Stack<Tuple<int, int>>();
@@ -232,6 +395,18 @@ public class Form1 : Form
         }
     }
 
+    // Make the class and event public
+    public class UpdateEventManager
+    {
+        // Make the event public
+        public static event Action<string> DownloadComplete;
+
+        // Make the method public
+        public static void OnDownloadComplete(string updatedExecutablePath)
+        {
+            DownloadComplete?.Invoke(updatedExecutablePath);
+        }
+    }
 
 
 
@@ -1270,6 +1445,16 @@ public class Form1 : Form
         };
         contextMenu.Items.Add(downloadExplorerItem);
 
+        ToolStripMenuItem checkForUpdatesItem = new ToolStripMenuItem("Check for Updates");
+        checkForUpdatesItem.Click += async delegate
+        {
+            await CheckForUpdates(isManualCheck: true); // Manual check
+        };
+
+
+
+        contextMenu.Items.Add(checkForUpdatesItem);
+
         contextMenu.Items.Add(new ToolStripSeparator());
 
         ToolStripMenuItem openMenu = new ToolStripMenuItem("Open");
@@ -1344,6 +1529,10 @@ public class Form1 : Form
 
         contextMenu.Show(button5, new Point(0, button5.Height));
     }
+
+
+
+
 
 
     private void ToggleAlwaysOnTop(ToolStripMenuItem item)
