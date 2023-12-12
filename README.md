@@ -6,9 +6,28 @@ Task Runway is an **open-source application** designed as a central location to 
 
 As efforts to support the development and support of Task Runway, a [$10 donation is strongly encouraged](https://www.davidinfosec.com/donate) if you find value with this application. **With your contribution you will receive an exclusive Supporter's License Key.** Please take your time to evaluate before donating. We want to keep things light-weight and open source.
 
-## Task Runway v1.0.2/v1.0.3 Release: Featuring: Automatic Updates
 
-Hello all!
+## Task Runway v1.0.4 Release: .lnk and file:/// support, improved management of resources 
+
+**This update's notable changes:**
+- Fixed item position in list box on removal.
+- Corrected undo behavior for item order.
+- Improved undo logic for multiple functions.
+- Enabled undo after item addition.
+- Added "file:///" support
+- Added .lnk support, which allows you to now link Windows file shortcuts.
+- Introduced "http://" default for URLs, a quicker way to add a website.
+
+Click [here](https://taskrunway.com/install) to download the latest version!
+
+
+### Latest Versions Summary:
+
+### Task Runway 1.0.3 Release and Beyond, Featuring: Automatic Updates
+
+Bug changes will be coming soon in v1.0.3 to address some of the issues mentioned at https://taskrunway.com/issues
+
+## Task Runway v1.0.2/v1.0.3 Release: Featuring: Automatic Updates
 
 This update features one major addition, automatic updating. The reason I wanted to get this release out quickly is because it will allow me to patch bugs while understanding that users may not want to have to keep updating their installation. 
 
@@ -16,34 +35,8 @@ Automatic updates are handled with an UpdaterApp.exe, which will periodically do
 
 Version 1.0.3 is the automatic update (1.0.2) with some bug fixes. The reason I have separated these into separate versions is to test the auto-update feature more thoroughly.
 
-## How to Get Task Runway 1.0.3
 
-Click [here](https://taskrunway.com/install) to download the latest version, or download the installer below. Bug changes will be coming soon in v1.0.3 to address some of the issues mentioned at https://taskrunway.com/issues
-
-
-# Task Runway v1.0.1 Release Changelog
-
-## New Features
-
-- **Movable Entries**
-
-- **Ascending/Descending Sorting**
-
-- **Edit Path Right-Click Context Menu**
-
-- **Toggleable Search Bar**
-
-- **Added Minimize Button**
-
-- **Expanded File Format Support**
-   - Added support for Markdown (.md), Text (.txt), Java Archive (.jar), Word Document (.docx), and empty folders.
-
-#### Experimental:
-- Attempting to get Auto Updates working, thank you for your patience as this is an early development. Updates are still mainly manual, so be sure to check back here. My hope is to get fully automated updates working soon!
-
- #### Bug hotfixes December 10th, 2023
-- Fixed item path/edit name not mapping properly to search, sort by ascending, sort by descending, move item up, move item down.
-- Fixed some bugs with undo and refresh. Plan to fix more soon as noted in [issues.](https://github.com/davidinfosec/task-runway/issues)
+# About Task Runway
 
 ## C# GUI - x64 Executable (Recommended)
 
