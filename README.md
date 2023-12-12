@@ -2,6 +2,10 @@
 
 ![explorer_5q74JXyN6j](https://github.com/davidinfosec/task-runway/assets/87215831/106245a9-5313-4a98-8fd0-b60e354d6140)
 
+Task Runway is an **open-source application** designed as a central location to take flight into your favorite tools. It is developed in C#, with alternative versions in Python available.
+
+As efforts to support the development and support of Task Runway, a [$10 donation is strongly encouraged](https://www.davidinfosec.com/donate) if you find value with this application. **With your contribution you will receive an exclusive Supporter's License Key.** Please take your time to evaluate before donating. We want to keep things light-weight and open source.
+
 ## Task Runway v1.0.2 Release: Featuring: Automatic Updates
 
 Hello all!
@@ -38,10 +42,6 @@ Click [here](https://taskrunway.com/install) to download the latest version, or 
  #### Bug hotfixes December 10th, 2023
 - Fixed item path/edit name not mapping properly to search, sort by ascending, sort by descending, move item up, move item down.
 - Fixed some bugs with undo and refresh. Plan to fix more soon as noted in [issues.](https://github.com/davidinfosec/task-runway/issues)
-
-Task Runway is an **open-source application** designed as a central location to take flight into your favorite tools. It is developed in C#, with alternative versions in Python available.
-
-As efforts to support the development and support of Task Runway, a [$10 donation is strongly encouraged](https://www.davidinfosec.com/donate) if you find value with this application. **With your contribution you will receive an exclusive Supporter's License Key.** Please take your time to evaluate before donating. We want to keep things light-weight and open source.
 
 ## C# GUI - x64 Executable (Recommended)
 
