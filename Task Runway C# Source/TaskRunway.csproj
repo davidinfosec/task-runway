@@ -11,10 +11,15 @@
 		<PackageIcon>app_icon.png</PackageIcon>
 		<ApplicationIcon>app_icon.ico</ApplicationIcon>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
+		<AssemblyVersion>1.0.2</AssemblyVersion>
+		<FileVersion>1.0.2</FileVersion>
+		<Version>1.0.2</Version>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Content Include="app_icon.ico" />
+		<Content Include="app_icon.ico">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
 	</ItemGroup>
 
 	<ItemGroup>
@@ -29,16 +34,18 @@
 		<None Include="E:\app_icon-1,app_icon-2,app_icon-3\app_icon.png">
 			<Pack>True</Pack>
 			<PackagePath>\</PackagePath>
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="AngleSharp" Version="1.0.7" />
-	  <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+	  <Folder Include="bin\Release\net8.0-windows\publish\win-x64\" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="bin\Release\net8.0-windows\publish\win-x64\" />
+	  <Reference Include="UpdaterApp">
+	    <HintPath>..\..\..\ConsoleApp1\ConsoleApp1\bin\Release\net8.0\publish\win-x64\Final\UpdaterApp.exe</HintPath>
+	  </Reference>
 	</ItemGroup>
 
 </Project>

@@ -1,4 +1,0 @@
-[https://www.reportname.com]
-path=https://www.reportname.com
-custom_flags=
-
