@@ -12,7 +12,7 @@ Automatic updates are handled with an UpdaterApp.exe, which will periodically do
 
 ## How to Get Task Runway 1.0.2
 
-Visit [TaskRunway.com](https://taskrunway.com/install) to download the latest version, or download the installer below. Bug changes will be coming soon in v1.0.3 to address some of the issues mentioned at https://taskrunway.com/issues
+Click [here](https://taskrunway.com/install) to download the latest version, or download the installer below. Bug changes will be coming soon in v1.0.3 to address some of the issues mentioned at https://taskrunway.com/issues
 
 
 # Task Runway v1.0.1 Release Changelog
