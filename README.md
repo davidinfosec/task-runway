@@ -45,7 +45,7 @@ Click [here](https://taskrunway.com/install) to download the latest version, or 
 
 ## C# GUI - x64 Executable (Recommended)
 
-The C# version of Task Runway is a very light-weight executable, only 1.17MB, offering a swift and enjoyable user experience. The source code is also provided for customization.
+The C# version of Task Runway is a very light-weight executable, less than 1MB, offering a swift and enjoyable user experience. The source code is also provided for customization.
 
 Task Runway supports scripts, executables, and websites. Simply add your desired tool to the list, and it will populate in a list box for easy access.
 
