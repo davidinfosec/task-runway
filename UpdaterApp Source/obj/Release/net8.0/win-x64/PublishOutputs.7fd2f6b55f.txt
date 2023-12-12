@@ -1,0 +1,2 @@
+C:\Users\Day\source\repos\ConsoleApp1\ConsoleApp1\bin\Release\net8.0\publish\win-x64\UpdaterApp.pdb
+C:\Users\Day\source\repos\ConsoleApp1\ConsoleApp1\bin\Release\net8.0\publish\win-x64\UpdaterApp.exe
