@@ -2,6 +2,21 @@
 
 ![explorer_5q74JXyN6j](https://github.com/davidinfosec/task-runway/assets/87215831/106245a9-5313-4a98-8fd0-b60e354d6140)
 
+## Task Runway v1.0.2 Release: Featuring: Automatic Updates
+
+Hello all!
+
+This update features one major addition, automatic updating. The reason I wanted to get this release out quickly is because it will allow me to patch bugs while understanding that users may not want to have to keep updating their installation. 
+
+Automatic updates are handled with an UpdaterApp.exe, which will periodically download from this repository for updates.
+
+Task Runway v1.0.2 - Featuring: Automatic Updates
+
+## How to Get Task Runway 1.0.2
+
+Visit [TaskRunway.com](https://taskrunway.com/install) to download the latest version, or download the installer below. Bug changes will be coming soon in v1.0.3 to address some of the issues mentioned at https://taskrunway.com/issues
+
+
 # Task Runway v1.0.1 Release Changelog
 
 ## New Features
