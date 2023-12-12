@@ -10,6 +10,7 @@ As efforts to support the development and support of Task Runway, a [$10 donatio
 ## Task Runway v1.0.4 Release: .lnk and file:/// support, improved management of resources 
 
 **This update's notable changes:**
+- icon file no longer required to launch (was a bug)
 - Fixed item position in list box on removal.
 - Corrected undo behavior for item order.
 - Improved undo logic for multiple functions.
@@ -94,7 +95,6 @@ Easy Download:
 3. Download the [.NET framework dependency](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/sdk-8.0.100-windows-x64-installer) after the install, if necessary.
 
 Note (the installer will do these for you, but good to know):
-- keep the app_icon.ico in the same path as the executable
 - keep the config.txt in the same path as the executable
 
 Thank you for using Task Runway. I hope it helps you as much as it helped me. 
