@@ -1,1 +1,1 @@
-1.03=https://github.com/davidinfosec/task-runway/raw/main/Automatic-Updates/v1.03/Task_Runway_x64_temp.exe
+1.0.2=https://github.com/davidinfosec/task-runway/raw/main/Automatic-Updates/v1.02/Task_Runway_x64_temp.exe
