@@ -1,4 +1,4 @@
-﻿// Task_Runway_x64, Version=1.0.2, Culture=neutral, PublicKeyToken=null
+﻿// Task_Runway_x64, Version=1.0.4, Culture=neutral, PublicKeyToken=null
 // Form1
 using System;
 using System.Collections;
@@ -19,6 +19,13 @@ using UpdaterApp;
 
 public class Form1 : Form
 {
+
+
+    private bool isCtrlPressed = false; // Track if Ctrl key is pressed
+    private bool isSearchActive = false; // Track the search state
+
+    List<(ScriptingTool tool, int index)> deletedTools = new List<(ScriptingTool tool, int index)>();
+
     private Version currentVersion;
 
     private string downloadLink;
@@ -38,6 +45,8 @@ public class Form1 : Form
 
 public class ScriptingTool
     {
+
+
         public string Name { get; set; }
 
         public string Path { get; set; }
@@ -82,8 +91,6 @@ public class ScriptingTool
 
     private const int SW_SHOWNORMAL = 1;
 
-    private List<ScriptingTool> deletedTools = new List<ScriptingTool>();
-
     private Stack<Tuple<int, string>> renamedToolsHistory = new Stack<Tuple<int, string>>();
 
     private Label label2;
@@ -103,8 +110,11 @@ public class ScriptingTool
 
     public Form1()
     {
+
+
+
         InitializeComponent();
-        currentVersion = new Version("1.0.2");
+        currentVersion = new Version("1.0.4");
         InitializeContextMenu();
         textBox1.TextChanged += textBox1_TextChanged;
         textBox1.KeyDown += textBox1_KeyDown;
@@ -113,6 +123,8 @@ public class ScriptingTool
         base.MinimizeBox = true;
         base.FormBorderStyle = FormBorderStyle.FixedSingle;
         listBox1.KeyDown += listBox1_KeyDown;
+        listBox1.MouseWheel += listBox1_MouseWheel;
+
     }
 
 
@@ -151,8 +163,6 @@ public class ScriptingTool
                 {
                     string version = versionParts[0].Trim();
                     string newDownloadLink = versionParts[1].Trim();
-
-                    Console.WriteLine($"Extracted version: {version}"); // Add this line for debugging
 
                     if (IsUpdateNeeded(version))
                     {
@@ -275,11 +285,26 @@ public class ScriptingTool
 
     public void RemoveToolFromList(ScriptingTool tool)
     {
-        if (tools.Contains(tool))
+        int index = tools.IndexOf(tool);
+        if (index != -1)
         {
+            // Record the removal in the undo stack before actually removing the tool
+            undoStack.Push(new UndoOperation
+            {
+                Type = OperationType.Delete,
+                Tool = tool,
+                OriginalIndex = index // Storing the index where the tool was before removal
+            });
+
             tools.Remove(tool);
+
+            // Update UI and save configuration
+            UpdateListBox();
+            SaveToolsToConfig();
+            RefreshTools();
         }
     }
+
 
 
 
@@ -362,24 +387,24 @@ public class ScriptingTool
 
         if (newIndex >= 0 && newIndex < filteredTools.Count)
         {
-            // Swap the selected item with the one above or below it
             SwapItemsInList(tools, selectedIndex, newIndex);
             SwapItemsInList(originalOrderTools, selectedIndex, newIndex);
             SwapItemsInList(filteredTools, selectedIndex, newIndex);
 
-            // Update the display in the listBox
+            // Record the move in the undo stack
+            undoStack.Push(new UndoOperation
+            {
+                Type = OperationType.Move,
+                OriginalIndex = selectedIndex,
+                NewIndex = newIndex
+            });
+
             UpdateListBox();
-
-            // Update the selected index after the swap
             listBox1.SelectedIndex = newIndex;
-
-            // Save the move to the history stack
-            moveHistory.Push(new Tuple<int, int>(selectedIndex, newIndex));
-
-            // Save the tools to the configuration
             SaveToolsToConfig();
         }
     }
+
 
 
 
@@ -419,15 +444,21 @@ public class ScriptingTool
         if (e.Button == MouseButtons.Right)
         {
             int index = listBox1.IndexFromPoint(e.Location);
-            if (index >= 0)
+            if (index != ListBox.NoMatches)
             {
                 listBox1.SelectedIndex = index;
-                listBoxContextMenu.Show(listBox1, listBox1.PointToClient(System.Windows.Forms.Cursor.Position));
+                listBox1.ContextMenuStrip = listBoxContextMenu;
+            }
+            else
+            {
+                // Prevent context menu from showing if no item is clicked
+                listBox1.ContextMenuStrip = null;
             }
         }
     }
 
- 
+
+
 
     private void InitializeContextMenu()
     {
@@ -446,10 +477,10 @@ public class ScriptingTool
 
         listBox1.ContextMenuStrip = listBoxContextMenu;
         listBox1.MouseDown += listBox1_MouseDown;
-   
 
-    // Refresh
-    ToolStripMenuItem refreshItem = new ToolStripMenuItem("Refresh");
+
+        // Refresh
+        ToolStripMenuItem refreshItem = new ToolStripMenuItem("Refresh");
         refreshItem.Click += delegate
         {
             RefreshTools();
@@ -482,8 +513,12 @@ public class ScriptingTool
         };
         listBoxContextMenu.Items.Add(renameItem);
 
+        // Check if a search is active
+        bool searchIsActive = IsSearchActive();
+
         // Move Item Up
         ToolStripMenuItem moveItemUp = new ToolStripMenuItem("Move Item Up");
+        moveItemUp.Enabled = !searchIsActive; // Disable if search is active
         moveItemUp.Click += delegate
         {
             MoveItemUp();
@@ -492,15 +527,38 @@ public class ScriptingTool
 
         // Move Item Down
         ToolStripMenuItem moveItemDown = new ToolStripMenuItem("Move Item Down");
+        moveItemDown.Enabled = !searchIsActive; // Disable if search is active
         moveItemDown.Click += delegate
         {
             MoveItemDown();
         };
         listBoxContextMenu.Items.Add(moveItemDown);
 
-        listBox1.ContextMenuStrip = listBoxContextMenu;
-        listBox1.MouseDown += listBox1_MouseDown;
+        // Dynamically update context menu items before showing
+        listBoxContextMenu.Opening += (sender, e) =>
+        {
+            bool searchIsActive = IsSearchActive();
+            int indexUnderMouse = listBox1.IndexFromPoint(listBox1.PointToClient(Cursor.Position));
+
+            foreach (ToolStripItem genericItem in listBoxContextMenu.Items)
+            {
+                // Check if the item is a ToolStripMenuItem
+                if (genericItem is ToolStripMenuItem item)
+                {
+                    if (item.Text == "Move Item Up" || item.Text == "Move Item Down")
+                    {
+                        item.Enabled = !searchIsActive && indexUnderMouse != ListBox.NoMatches;
+                    }
+                    else
+                    {
+                        item.Enabled = indexUnderMouse != ListBox.NoMatches;
+                    }
+                }
+                // No need to do anything for ToolStripSeparator or other types
+            }
+        };
     }
+
 
 
 
@@ -517,53 +575,57 @@ public class ScriptingTool
 
 
 
-  private void EditPath()
-{
-    // Get the selected index from the ListBox
-    int selectedIndex = listBox1.SelectedIndex;
-
-    // Check if the selected index is within the valid range of filteredTools
-    if (selectedIndex >= 0 && selectedIndex < filteredTools.Count)
+    private void EditPath()
     {
-        // Retrieve the selected tool from filteredTools
-        ScriptingTool selectedTool = filteredTools[selectedIndex];
+        // Get the selected index from the ListBox
+        int selectedIndex = listBox1.SelectedIndex;
 
-        // Example: Use InputBox or any other UI element to get the new path
-        string currentPath = selectedTool.Path;
-        string newPath = Interaction.InputBox("Enter the new path:", "Edit Path", currentPath);
-
-        // Check if the new path is not empty or null
-        if (!string.IsNullOrWhiteSpace(newPath))
+        // Check if the selected index is within the valid range of filteredTools
+        if (selectedIndex >= 0 && selectedIndex < filteredTools.Count)
         {
-            // Push the current state into the history stack
-            pathChangesHistory.Push(new Tuple<int, string, string>(selectedIndex, currentPath, newPath));
+            // Retrieve the selected tool from filteredTools
+            ScriptingTool selectedTool = filteredTools[selectedIndex];
 
-            // Update the tool's path
-            selectedTool.Path = newPath;
+            // Use InputBox or any other UI element to get the new path
+            string currentPath = selectedTool.Path;
+            string newPath = Interaction.InputBox("Enter the new path:", "Edit Path", currentPath);
 
-            // Save the changes to the configuration
-            SaveToolsToConfig();
-
-            // Reapply the search if there is text in the search TextBox
-            if (!string.IsNullOrWhiteSpace(textBox1.Text))
+            // Check if the new path is not empty or null
+            if (!string.IsNullOrWhiteSpace(newPath) && newPath != currentPath)
             {
-                PerformSearch();
-            }
-            else
-            {
-                // Update the display in listBox1 with the filtered tools
-                UpdateListBox(filteredTools);
+                // Record the path change in undoStack
+                undoStack.Push(new UndoOperation
+                {
+                    Type = OperationType.PathChange,
+                    Tool = selectedTool,
+                    OldPath = currentPath,
+                    OriginalIndex = selectedIndex // Optional, if you need to track the index
+                });
+
+                // Update the tool's path
+                selectedTool.Path = newPath;
+
+                // Save the changes to the configuration
+                SaveToolsToConfig();
+
+                // Reapply the search if there is text in the search TextBox, or update the ListBox
+                if (!string.IsNullOrWhiteSpace(textBox1.Text))
+                {
+                    PerformSearch();
+                }
+                else
+                {
+                    UpdateListBox(filteredTools);
+                }
             }
         }
     }
-}
 
 
 
 
 
-
-    private void UpdateListBoxForSearch(List<ScriptingTool> items)
+private void UpdateListBoxForSearch(List<ScriptingTool> items)
     {
         listBox1.Items.Clear();
 
@@ -573,42 +635,34 @@ public class ScriptingTool
         }
     }
 
-
-
- private void RenameTool()
-{
-    // Get the selected index from the ListBox
-    int selectedIndex = listBox1.SelectedIndex;
-
-    // Check if the selected index is within the valid range of filteredTools
-    if (selectedIndex >= 0 && selectedIndex < filteredTools.Count)
+    private void RenameTool()
     {
-        // Retrieve the selected tool from filteredTools
-        ScriptingTool selectedTool = filteredTools[selectedIndex];
+        int selectedIndex = listBox1.SelectedIndex;
 
-        // Get the current name of the tool
-        string currentName = selectedTool.Name;
-
-        // Use InputBox or any other UI element to get the new name
-        string newName = Interaction.InputBox("Enter a new name:", "Rename Tool", currentName);
-
-        // Check if the new name is not empty or null
-        if (!string.IsNullOrEmpty(newName))
+        if (selectedIndex >= 0 && selectedIndex < filteredTools.Count)
         {
-            // Push the current state into the history stack
-            renamedToolsHistory.Push(new Tuple<int, string>(selectedIndex, currentName));
+            ScriptingTool selectedTool = filteredTools[selectedIndex];
+            string currentName = selectedTool.Name;
+            string newName = Interaction.InputBox("Enter a new name:", "Rename Tool", currentName);
 
-            // Update the tool's name
-            selectedTool.Name = newName;
+            if (!string.IsNullOrEmpty(newName) && newName != currentName)
+            {
+                undoStack.Push(new UndoOperation
+                {
+                    Type = OperationType.Rename,
+                    Tool = selectedTool,
+                    OldName = currentName,
+                    NewName = newName
+                });
 
-            // Save the updated tools to the configuration file
-            SaveToolsToConfig();
+                selectedTool.Name = newName;
+                UpdateListBox(filteredTools);
+                SaveToolsToConfig();
 
-            // Update the display in listBox1 with the filtered tools
-            UpdateListBox(filteredTools);
+            }
         }
     }
-}
+
 
 
 
@@ -690,27 +744,41 @@ public class ScriptingTool
 
     private void listBox1_KeyDown(object sender, KeyEventArgs e)
     {
-        if (e.KeyCode == Keys.Return)
+        // Check if Ctrl key is held down and not in a search
+        if (e.Control && !isSearchActive)
         {
-            LaunchSelectedTool();
-            e.Handled = true;
+            // Handle Ctrl+Up and Ctrl+Down to prevent the default behavior
+            if (e.KeyCode == Keys.Up || e.KeyCode == Keys.Down)
+            {
+                e.Handled = true;
+                e.SuppressKeyPress = true;
+
+                // Determine the direction based on the key pressed
+                int direction = (e.KeyCode == Keys.Up) ? -1 : 1;
+
+                // Move the selected item based on the direction
+                MoveItem(listBox1.SelectedIndex, direction, true);
+            }
         }
-        else if (e.Control && (e.KeyCode == Keys.Up || e.KeyCode == Keys.Down))
+    }
+
+    private void listBox1_KeyUp(object sender, KeyEventArgs e)
+    {
+        // Reset the Ctrl key state when it's released
+        if (e.KeyCode == Keys.ControlKey)
         {
-            int selectedIndex = listBox1.SelectedIndex;
-            int direction = (e.KeyCode == Keys.Up) ? -1 : 1;
-            MoveItem(selectedIndex, direction);
-            e.Handled = true;
+            isCtrlPressed = false;
         }
     }
 
 
     private int originalMoveIndex; // Add this variable at the class level
 
+
     private void listBox1_MouseWheel(object sender, MouseEventArgs e)
     {
-        // Check if the Ctrl key is held down
-        if (Control.ModifierKeys == Keys.Control)
+        // Check if the Ctrl key is held down and not in search mode
+        if (Control.ModifierKeys == Keys.Control && !isSearchActive)
         {
             // Determine the direction of the scroll (up or down)
             int direction = (e.Delta > 0) ? -1 : 1;
@@ -722,6 +790,10 @@ public class ScriptingTool
             ((HandledMouseEventArgs)e).Handled = true;
         }
     }
+
+
+
+
 
     private void MoveItem(int selectedIndex, int direction, bool recordOriginalIndex = false)
     {
@@ -752,6 +824,18 @@ public class ScriptingTool
             // Save the tools to the configuration
             SaveToolsToConfig();
         }
+    }
+
+
+    protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+    {
+        if (keyData == (Keys.Control | Keys.Z))
+        {
+            UndoChanges();
+            return true;
+        }
+
+        return base.ProcessCmdKey(ref msg, keyData); // Return false for other keyData
     }
 
 
@@ -824,13 +908,35 @@ public class ScriptingTool
                     CreateNoWindow = false
                 });
             }
-            else if (Uri.TryCreate(selectedTool.Path, UriKind.Absolute, out uri) && uri.Scheme.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+            else if (selectedTool.Path.EndsWith(".lnk", StringComparison.OrdinalIgnoreCase))
             {
                 Process.Start(new ProcessStartInfo
                 {
                     FileName = selectedTool.Path,
-                    UseShellExecute = true
+                    WorkingDirectory = Path.GetDirectoryName(selectedTool.Path),
+                    UseShellExecute = true  // Important for launching .lnk files
                 });
+            }
+            else if (Uri.TryCreate(selectedTool.Path, UriKind.Absolute, out uri))
+            {
+                if (uri.Scheme.Equals("http", StringComparison.OrdinalIgnoreCase) || uri.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase))
+                {
+                    // Open web URLs using the default web browser
+                    Process.Start(new ProcessStartInfo
+                    {
+                        FileName = selectedTool.Path,
+                        UseShellExecute = true
+                    });
+                }
+                else if (uri.Scheme.Equals("file", StringComparison.OrdinalIgnoreCase))
+                {
+                    // Handle file URLs by opening them in the default web browser
+                    Process.Start(new ProcessStartInfo
+                    {
+                        FileName = selectedTool.Path,
+                        UseShellExecute = true
+                    });
+                }
             }
             else if (selectedTool.Path.EndsWith(".docx", StringComparison.OrdinalIgnoreCase) ||
                      selectedTool.Path.EndsWith(".md", StringComparison.OrdinalIgnoreCase) ||
@@ -868,7 +974,7 @@ public class ScriptingTool
         ContextMenuStrip contextMenu = new ContextMenuStrip();
         ToolStripMenuItem addWebsiteToolItem = new ToolStripMenuItem("Add Website (URL)");
         ToolStripMenuItem addScriptToolItem = new ToolStripMenuItem("Add Script (.ps1, .bat, .py)");
-        ToolStripMenuItem addExecutableToolItem = new ToolStripMenuItem("Add Program (.exe, .jar)");
+        ToolStripMenuItem addExecutableToolItem = new ToolStripMenuItem("Add Program (.exe, .jar, .lnk)");
         ToolStripMenuItem addDocumentToolItem = new ToolStripMenuItem("Add Document (.docx, .md, .txt, .pdf)");
         ToolStripMenuItem addFolderPathToolItem = new ToolStripMenuItem("Add Folder Path");
 
@@ -907,63 +1013,98 @@ public class ScriptingTool
         button3.ContextMenuStrip.Show(button3, new Point(0, button3.Height));
     }
 
+
+
     private void AddTool(string toolType)
     {
         switch (toolType)
         {
             case "Website":
                 {
-                    string url = Interaction.InputBox("Enter the URL (http(s)://example.com):", "Enter URL");
-                    if (!string.IsNullOrWhiteSpace(url))
+                    using (URL urlForm = new URL())
                     {
-                        string toolName3 = Interaction.InputBox("Enter a name for the tool (optional):", "Enter Name", url);
-                        if (string.IsNullOrWhiteSpace(toolName3))
+                        if (urlForm.ShowDialog() == DialogResult.OK)
                         {
-                            toolName3 = new Uri(url).Host;
+                            string enteredURL = urlForm.GetURL();
+
+                            // URL validation and processing
+                            if (!(enteredURL.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+                                  enteredURL.StartsWith("https://", StringComparison.OrdinalIgnoreCase) ||
+                                  enteredURL.StartsWith("file:///", StringComparison.OrdinalIgnoreCase)))
+                            {
+                                enteredURL = "http://" + enteredURL;
+                            }
+
+                            // Pass the entered URL to EnterToolName form to pre-populate the tool name
+                            using (EnterToolName toolNameForm = new EnterToolName(enteredURL))
+                            {
+                                if (toolNameForm.ShowDialog() == DialogResult.OK)
+                                {
+                                    string toolName = toolNameForm.GetToolName();
+
+                                    // Create and add the new tool
+                                    ScriptingTool newTool = new ScriptingTool(toolName, enteredURL, "");
+                                    AddToolToList(newTool);
+                                    SaveToolsToConfig();
+                                    RefreshTools();
+                                }
+                            }
                         }
-                        AddToolToList(new ScriptingTool(toolName3, url, ""));
                     }
                     break;
                 }
+
+
             case "Script":
                 {
-                    OpenFileDialog openFileDialog2 = new OpenFileDialog
+                    OpenFileDialog openFileDialog = new OpenFileDialog
                     {
                         Title = "Select Script File",
                         Filter = "Script files (*.bat;*.ps1;*.py)|*.bat;*.ps1;*.py",
                         InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Personal)
                     };
-                    if (openFileDialog2.ShowDialog() == DialogResult.OK)
+                    if (openFileDialog.ShowDialog() == DialogResult.OK)
                     {
-                        string toolName2 = Interaction.InputBox("Enter a name for the tool (optional):", "Enter Name", openFileDialog2.SafeFileName);
-                        if (string.IsNullOrWhiteSpace(toolName2))
+                        string defaultName = Path.GetFileNameWithoutExtension(openFileDialog.FileName);
+                        using (EnterToolName toolNameForm = new EnterToolName(defaultName))
                         {
-                            toolName2 = Path.GetFileNameWithoutExtension(openFileDialog2.FileName);
+                            if (toolNameForm.ShowDialog() == DialogResult.OK)
+                            {
+                                string toolName = toolNameForm.GetToolName();
+                                AddToolToList(new ScriptingTool(toolName, openFileDialog.FileName, ""));
+                                SaveToolsToConfig();
+                                RefreshTools();
+                            }
                         }
-                        AddToolToList(new ScriptingTool(toolName2, openFileDialog2.FileName, ""));
                     }
                     break;
                 }
+
             case "Executable":
                 {
                     OpenFileDialog openFileDialog = new OpenFileDialog
                     {
                         Title = "Select Executable File",
-                        Filter = "Executable files (*.exe;*.jar)|*.exe;*.jar",
+                        Filter = "Executable files (*.exe;*.jar;*.lnk)|*.exe;*.jar;*.lnk",
                         InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles)
                     };
+
                     if (openFileDialog.ShowDialog() == DialogResult.OK)
                     {
-                        string toolName = Interaction.InputBox("Enter a name for the tool (optional):", "Enter Name", openFileDialog.SafeFileName);
-                        if (string.IsNullOrWhiteSpace(toolName))
+                        string defaultName = Path.GetFileNameWithoutExtension(openFileDialog.FileName);
+                        using (EnterToolName toolNameForm = new EnterToolName(defaultName))
                         {
-                            toolName = Path.GetFileNameWithoutExtension(openFileDialog.FileName);
+                            if (toolNameForm.ShowDialog() == DialogResult.OK)
+                            {
+                                string toolName = toolNameForm.GetToolName();
+                                AddToolToList(new ScriptingTool(toolName, openFileDialog.FileName, ""));
+                                SaveToolsToConfig();
+                                RefreshTools();
+                            }
                         }
-                        AddToolToList(new ScriptingTool(toolName, openFileDialog.FileName, ""));
                     }
                     break;
                 }
-
             case "Document":
                 {
                     OpenFileDialog openFileDialog = new OpenFileDialog
@@ -972,19 +1113,24 @@ public class ScriptingTool
                         Filter = "Document files (*.docx;*.md;*.txt;*.pdf)|*.docx;*.md;*.txt;*.pdf",
                         InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Personal)
                     };
+
                     if (openFileDialog.ShowDialog() == DialogResult.OK)
                     {
-                        string toolName = Interaction.InputBox("Enter a name for the tool (optional):", "Enter Name", openFileDialog.SafeFileName);
-                        if (string.IsNullOrWhiteSpace(toolName))
+                        string defaultName = Path.GetFileNameWithoutExtension(openFileDialog.FileName);
+                        using (EnterToolName toolNameForm = new EnterToolName(defaultName))
                         {
-                            toolName = Path.GetFileNameWithoutExtension(openFileDialog.FileName);
+                            if (toolNameForm.ShowDialog() == DialogResult.OK)
+                            {
+                                string toolName = toolNameForm.GetToolName();
+                                AddToolToList(new ScriptingTool(toolName, openFileDialog.FileName, ""));
+                                SaveToolsToConfig();
+                                RefreshTools();
+                            }
                         }
-
-                        // Add the tool to the list (or perform any other necessary actions)
-                        AddToolToList(new ScriptingTool(toolName, openFileDialog.FileName, ""));
                     }
                     break;
                 }
+
             case "Folder":
                 {
                     FolderBrowserDialog folderBrowserDialog = new FolderBrowserDialog
@@ -996,27 +1142,47 @@ public class ScriptingTool
                     if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
                     {
                         string folderPath = folderBrowserDialog.SelectedPath;
+                        string defaultName = new DirectoryInfo(folderPath).Name;
 
-                        string toolNameForFolder = Interaction.InputBox("Enter a name for the tool (optional):", "Enter Name", folderPath);
-                        if (string.IsNullOrWhiteSpace(toolNameForFolder))
+                        using (EnterToolName toolNameForm = new EnterToolName(defaultName))
                         {
-                            toolNameForFolder = new DirectoryInfo(folderPath).Name;
+                            if (toolNameForm.ShowDialog() == DialogResult.OK)
+                            {
+                                string toolNameForFolder = toolNameForm.GetToolName();
+                                AddToolToList(new ScriptingTool(toolNameForFolder, folderPath, ""));
+                                SaveToolsToConfig();
+                                RefreshTools();
+                            }
                         }
-
-                        AddToolToList(new ScriptingTool(toolNameForFolder, folderPath, ""));
                     }
                     break;
                 }
+
         }
     }
+
+
+
 
     public void AddToolToList(ScriptingTool tool)
     {
         tools.Add(tool);
         originalOrderTools.Add(tool); // Add the new tool to originalOrderTools as well
-        SaveToolsToConfig(); // Save the tools to the configuration file immediately after adding a new tool
+
+        // Record this addition in the undo stack, along with the index at which it was added
+        undoStack.Push(new UndoOperation
+        {
+            Type = OperationType.Add,
+            Tool = tool,
+            OriginalIndex = tools.Count - 1 // Index where the tool was added
+        });
+
         UpdateListBox();
+        SaveToolsToConfig(); // Save the tools to the configuration file immediately after adding a new tool
+        RefreshTools();
     }
+
+
 
 
     private void SaveToolsToConfig()
@@ -1141,6 +1307,9 @@ public class ScriptingTool
     {
         string searchText = textBox1.Text.ToLower();
 
+        // Check if a search is active
+        isSearchActive = !string.IsNullOrWhiteSpace(searchText);
+
         // Filter tools based on the entered search text
         filteredTools = tools
             .Where(tool => tool.Name.ToLower().Contains(searchText))
@@ -1151,6 +1320,15 @@ public class ScriptingTool
     }
 
 
+
+
+
+
+    private bool IsSearchActive()
+    {
+        // Assuming 'filteredTools' is null or identical to 'tools' when no search is active
+        return filteredTools != null && !filteredTools.SequenceEqual(tools);
+    }
 
 
 
@@ -1386,15 +1564,62 @@ public class ScriptingTool
     private void button6_Click(object sender, EventArgs e)
     {
         int selectedIndex = listBox1.SelectedIndex;
-        if (selectedIndex >= 0 && selectedIndex < tools.Count)
+        if (selectedIndex >= 0)
         {
-            ScriptingTool deletedTool = tools[selectedIndex];
-            tools.RemoveAt(selectedIndex);
-            deletedTools.Add(deletedTool);
-            SaveToolsToConfig();
-            UpdateListBox();
+            // Save the current top index of the ListBox for maintaining scroll position
+            int topIndex = listBox1.TopIndex;
+
+            // Call DeleteItem to perform the deletion
+            DeleteItem(selectedIndex);
+
+            // Restore the ListBox's scroll position
+            listBox1.TopIndex = topIndex;
+
+            // Optionally, update the selected index to the next item in the list
+            if (selectedIndex < listBox1.Items.Count)
+            {
+                listBox1.SelectedIndex = selectedIndex;
+            }
+            else if (listBox1.Items.Count > 0)
+            {
+                listBox1.SelectedIndex = listBox1.Items.Count - 1;
+            }
+        }
+        else
+        {
+            MessageBox.Show("No item selected to delete.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
     }
+
+
+    private void DeleteItem(int index)
+    {
+        if (index >= 0 && index < tools.Count)
+        {
+            ScriptingTool deletedTool = tools[index];
+
+            // Record the deletion in the undo stack
+            undoStack.Push(new UndoOperation
+            {
+                Type = OperationType.Delete,
+                Tool = deletedTool,
+                OriginalIndex = index
+            });
+
+            // Remove the tool from all relevant lists
+            tools.RemoveAt(index);
+            filteredTools.RemoveAt(index); // Update if filteredTools is in sync with tools
+            originalOrderTools.RemoveAt(index); // Update if originalOrderTools is in sync with tools
+
+            // Update UI and save changes
+            UpdateListBox();
+            SaveToolsToConfig();
+            LoadToolsFromConfig();
+        }
+    }
+
+
+
 
     private void button5_Click(object sender, EventArgs e)
     {
@@ -1560,7 +1785,9 @@ public class ScriptingTool
         }
     }
 
-            private void CustomFlags()
+    private string previousCustomFlags = ""; // Declare a variable to store the previous custom flags
+
+    private void CustomFlags()
     {
         int selectedIndex = listBox1.SelectedIndex;
         if (selectedIndex >= 0 && selectedIndex < tools.Count)
@@ -1569,9 +1796,24 @@ public class ScriptingTool
             if (selectedTool.Path.EndsWith(".bat", StringComparison.OrdinalIgnoreCase) || selectedTool.Path.EndsWith(".py", StringComparison.OrdinalIgnoreCase) || selectedTool.Path.EndsWith(".ps1", StringComparison.OrdinalIgnoreCase))
             {
                 string currentFlags = selectedTool.CustomFlags;
-                string newFlags = Interaction.InputBox("Enter Custom Flags:", "Edit Custom Flags", currentFlags);
+
+                // Set the default input to the previous custom flags
+                string newFlags = Interaction.InputBox("Enter Custom Flags:", "Edit Custom Flags", previousCustomFlags);
+
+                // Store the previous custom flags
+                previousCustomFlags = newFlags;
+
+                // Update the custom flags
                 selectedTool.CustomFlags = newFlags;
                 SaveToolsToConfig();
+
+                // Create an undo operation and push it to the stack
+                undoStack.Push(new UndoOperation
+                {
+                    Type = OperationType.CustomFlagsChange,
+                    Tool = selectedTool,
+                    OldCustomFlags = currentFlags
+                });
             }
             else
             {
@@ -1584,68 +1826,178 @@ public class ScriptingTool
         }
     }
 
+
+
     private void RefreshTools()
     {
         LoadToolsFromConfig();
         UpdateListBox();
     }
 
+
+    enum OperationType { Add, Delete, Rename, Move, PathChange, CustomFlagsChange }
+
+    class UndoOperation
+    {
+        public OperationType Type { get; set; }
+        public ScriptingTool Tool { get; set; }
+        public int OriginalIndex { get; set; }
+        public int NewIndex { get; set; } // For move operations
+        public string OldName { get; set; } // For rename operations
+        public string NewName { get; set; } // For rename operations
+        public string OldPath { get; set; } // For path change operations
+        public string OldCustomFlags { get; set; }
+        public string NewCustomFlags { get; set; }
+    }
+
+
+    private Stack<UndoOperation> undoStack = new Stack<UndoOperation>();
+
     private void UndoChanges()
     {
-        if (deletedTools.Count > 0)
+        if (undoStack.Count > 0)
         {
-            ScriptingTool restoredTool = deletedTools[deletedTools.Count - 1];
-            deletedTools.RemoveAt(deletedTools.Count - 1);
-            tools.Add(restoredTool);
-        }
-        else if (renamedToolsHistory.Count > 0)
-        {
-            Tuple<int, string> lastRename = renamedToolsHistory.Pop();
-            int index = lastRename.Item1;
-            string oldName = lastRename.Item2;
-            tools[index].Name = oldName;
-        }
-        else if (pathChangesHistory.Count > 0)
-        {
-            // Undo path change
-            Tuple<int, string, string> lastPathChange = pathChangesHistory.Pop();
-            int selectedIndexPath = lastPathChange.Item1;
-            string originalPath = lastPathChange.Item2;
+            int topIndex = listBox1.TopIndex;
 
-            // Revert the path change
-            tools[selectedIndexPath].Path = originalPath;
-        }
-        else if (moveHistory.Count > 0)
-        {
-            // Undo Move
-            Tuple<int, int> lastMove = moveHistory.Pop();
-            int selectedIndex = lastMove.Item1;
-            int newIndex = lastMove.Item2;
+            var operation = undoStack.Pop();
+            switch (operation.Type)
+            {
+                case OperationType.Add:
+                    UndoAdd(operation);
+                    break;
+                case OperationType.Delete:
+                    UndoDelete(operation);
+                    break;
+                case OperationType.Rename:
+                    UndoRename(operation);
+                    break;
+                case OperationType.Move:
+                    UndoMove(operation);
+                    break;
+                case OperationType.PathChange:
+                    UndoPathChange(operation);
+                    break;
+                case OperationType.CustomFlagsChange:
+                    UndoCustomFlagsChange(operation);
+                    break;
+            }
 
-            // Swap the items back to undo the move
-            SwapItemsInList(tools, selectedIndex, newIndex);
-            SwapItemsInList(originalOrderTools, selectedIndex, newIndex);
-            SwapItemsInList(filteredTools, selectedIndex, newIndex);
-
-            // Update the display in the listBox
-            UpdateListBox();
-
-            // Update the selected index after the undo
-            listBox1.SelectedIndex = selectedIndex;
-
-            // Save the tools to the configuration
+            UpdateListBox(filteredTools);
             SaveToolsToConfig();
+            LoadToolsFromConfig();
+            listBox1.TopIndex = topIndex;
+            RefreshTools();
         }
         else
         {
-            MessageBox.Show("No changes to undo.", "Info", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
-            return;  // No changes to apply, return early
+            MessageBox.Show("No actions to undo.", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
-
-        // Save the changes to config and update the display
-        SaveToolsToConfig();
-        UpdateListBox();
     }
+
+    private void UndoCustomFlagsChange(UndoOperation operation)
+    {
+        if (operation != null && operation.Tool != null)
+        {
+            // Restore the custom flags to the previous value
+            operation.Tool.CustomFlags = operation.OldCustomFlags;
+            SaveToolsToConfig();
+        }
+    }
+
+
+
+    private void UndoAdd(UndoOperation operation)
+    {
+        if (operation != null && operation.OriginalIndex >= 0 && operation.OriginalIndex < tools.Count)
+        {
+            tools.RemoveAt(operation.OriginalIndex);
+            originalOrderTools.RemoveAt(operation.OriginalIndex); // If originalOrderTools should mirror tools
+
+            // Update UI            
+            SaveToolsToConfig();
+            UpdateListBox(filteredTools);
+            LoadToolsFromConfig();
+        }
+    }
+
+
+
+
+    private void UndoDelete(UndoOperation operation)
+    {
+        if (operation != null && operation.Tool != null && operation.OriginalIndex >= 0 && operation.OriginalIndex <= tools.Count)
+        {
+            // Re-insert the tool at its original position
+            tools.Insert(operation.OriginalIndex, operation.Tool);
+            filteredTools.Insert(operation.OriginalIndex, operation.Tool); // If using
+            originalOrderTools.Insert(operation.OriginalIndex, operation.Tool); // If using
+
+            // Update UI
+            UpdateListBox(filteredTools);
+            SaveToolsToConfig();
+            RefreshTools();
+
+        }
+    }
+
+
+
+
+    private void UndoRename(UndoOperation operation)
+    {
+        if (operation != null && operation.Tool != null && !string.IsNullOrEmpty(operation.OldName))
+        {
+            operation.Tool.Name = operation.OldName;
+
+            // Update UI
+            UpdateListBox(filteredTools);
+            SaveToolsToConfig();
+            LoadToolsFromConfig();
+        }
+    }
+
+
+
+    private void UndoMove(UndoOperation operation)
+    {
+        if (operation != null && operation.OriginalIndex >= 0 && operation.NewIndex >= 0 &&
+            operation.OriginalIndex < tools.Count && operation.NewIndex < tools.Count)
+        {
+            SwapItemsInList(tools, operation.OriginalIndex, operation.NewIndex);
+            SwapItemsInList(originalOrderTools, operation.OriginalIndex, operation.NewIndex);
+            SwapItemsInList(filteredTools, operation.OriginalIndex, operation.NewIndex);
+
+            UpdateListBox();
+            SaveToolsToConfig();
+
+        }
+    }
+
+
+    private void UndoPathChange(UndoOperation operation)
+    {
+        // Check if the operation and tool are valid
+        if (operation != null && operation.Tool != null)
+        {
+            // Revert the tool's path to its old value
+            operation.Tool.Path = operation.OldPath;
+
+            // Optional: If you need to update a specific tool in a list based on its index
+            if (operation.OriginalIndex >= 0 && operation.OriginalIndex < tools.Count)
+            {
+                tools[operation.OriginalIndex].Path = operation.OldPath;
+            }
+
+            // Update the UI with the latest tool data
+            UpdateListBox(filteredTools);
+
+            // Save the updated tool data to your configuration
+            SaveToolsToConfig();
+        }
+    }
+
+
+
 
 
 
@@ -1772,9 +2124,41 @@ public class ScriptingTool
         }
     }
 
+    // Custom function to show the smaller input box
+    private string ShowSmallInputBox(string prompt, string title)
+    {
+        TextBox textBox = new TextBox();
+        textBox.Size = new Size(200, 20); // Set the size you prefer
+        Form form = new Form();
+        form.Text = title;
+        form.Size = new Size(300, 100); // Adjust the form size as needed
+        form.Controls.Add(textBox);
 
+        Label label = new Label();
+        label.Text = prompt;
+        label.Location = new Point(10, 20);
+        form.Controls.Add(label);
 
-    private void linkLabel2_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        Button buttonOK = new Button();
+        buttonOK.Text = "OK";
+        buttonOK.DialogResult = DialogResult.OK;
+        buttonOK.Location = new Point(10, 50);
+        form.Controls.Add(buttonOK);
+
+        form.AcceptButton = buttonOK;
+        DialogResult dialogResult = form.ShowDialog();
+
+        if (dialogResult == DialogResult.OK)
+        {
+            return textBox.Text;
+        }
+        else
+        {
+            return string.Empty;
+        }
+    }
+
+        private void linkLabel2_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
     {
         try
         {
