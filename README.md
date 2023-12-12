@@ -6,7 +6,7 @@ Task Runway is an **open-source application** designed as a central location to 
 
 As efforts to support the development and support of Task Runway, a [$10 donation is strongly encouraged](https://www.davidinfosec.com/donate) if you find value with this application. **With your contribution you will receive an exclusive Supporter's License Key.** Please take your time to evaluate before donating. We want to keep things light-weight and open source.
 
-## Task Runway v1.0.2 Release: Featuring: Automatic Updates
+## Task Runway v1.0.2/v1.0.3 Release: Featuring: Automatic Updates
 
 Hello all!
 
@@ -14,7 +14,9 @@ This update features one major addition, automatic updating. The reason I wanted
 
 Automatic updates are handled with an UpdaterApp.exe, which will periodically download from this repository for updates.
 
-## How to Get Task Runway 1.0.2
+Version 1.0.3 is the automatic update (1.0.2) with some bug fixes. The reason I have separated these into separate versions is to test the auto-update feature more thoroughly.
+
+## How to Get Task Runway 1.0.3
 
 Click [here](https://taskrunway.com/install) to download the latest version, or download the installer below. Bug changes will be coming soon in v1.0.3 to address some of the issues mentioned at https://taskrunway.com/issues
 
