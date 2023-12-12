@@ -10,8 +10,6 @@ This update features one major addition, automatic updating. The reason I wanted
 
 Automatic updates are handled with an UpdaterApp.exe, which will periodically download from this repository for updates.
 
-Task Runway v1.0.2 - Featuring: Automatic Updates
-
 ## How to Get Task Runway 1.0.2
 
 Visit [TaskRunway.com](https://taskrunway.com/install) to download the latest version, or download the installer below. Bug changes will be coming soon in v1.0.3 to address some of the issues mentioned at https://taskrunway.com/issues
