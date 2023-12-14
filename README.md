@@ -107,7 +107,10 @@ If you enjoy using it, consider [donating](https://www.davidinfosec.com/donate) 
 
 2. Press the Windows Key, type 'Add or Remove Programs', and search for TaskRunwaySetup.
 
-3. Press the Uninstall button
+3. Back up your Downloaded Tools in the program folder, if you used the Download Explorer and want to save anything.
+
+4. Press the Uninstall button
+
 
 ---
 
