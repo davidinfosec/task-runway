@@ -9,15 +9,15 @@
 		<AssemblyName>Task_Runway_x64</AssemblyName>
 		<Company>DavidInfosec</Company>
 		<PackageIcon>app_icon.png</PackageIcon>
-		<ApplicationIcon>app_icon.ico</ApplicationIcon>
+		<ApplicationIcon>bin\Release\app_icon.ico</ApplicationIcon>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
-		<AssemblyVersion>1.0.4</AssemblyVersion>
-		<FileVersion>1.0.4</FileVersion>
-		<Version>1.0.4</Version>
+		<AssemblyVersion>1.0.4.2</AssemblyVersion>
+		<FileVersion>1.0.4.2</FileVersion>
+		<Version>1.0.4.2</Version>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Content Include="app_icon.ico">
+		<Content Include="bin\Release\app_icon.ico">
 		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</Content>
 	</ItemGroup>
@@ -31,7 +31,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<None Include="E:\app_icon-1,app_icon-2,app_icon-3\app_icon.png">
+		<None Include="bin\Release\app_icon.png">
 			<Pack>True</Pack>
 			<PackagePath>\</PackagePath>
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -40,12 +40,28 @@
 
 	<ItemGroup>
 	  <Folder Include="bin\Release\net8.0-windows\publish\win-x64\" />
+	  <Folder Include="bin\Release\net8.0-windows\win-x64\" />
 	</ItemGroup>
 
 	<ItemGroup>
 	  <Reference Include="UpdaterApp">
 	    <HintPath>..\..\..\..\..\..\..\Program Files\DavidInfosec\Task Runway\UpdaterApp.exe</HintPath>
 	  </Reference>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Compile Update="Properties\Resources.Designer.cs">
+	    <DesignTime>True</DesignTime>
+	    <AutoGen>True</AutoGen>
+	    <DependentUpon>Resources.resx</DependentUpon>
+	  </Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <EmbeddedResource Update="Properties\Resources.resx">
+	    <Generator>ResXFileCodeGenerator</Generator>
+	    <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+	  </EmbeddedResource>
 	</ItemGroup>
 
 </Project>

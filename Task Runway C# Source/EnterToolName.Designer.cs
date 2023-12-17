@@ -41,8 +41,9 @@
             label2.Name = "label2";
             label2.Size = new Size(327, 25);
             label2.TabIndex = 15;
-            label2.Text = "Enter Tool Name (Optional):";
+            label2.Text = "Enter Tool Name:";
             label2.TextAlign = ContentAlignment.MiddleCenter;
+            label2.Click += label2_Click;
             // 
             // textBox1
             // 

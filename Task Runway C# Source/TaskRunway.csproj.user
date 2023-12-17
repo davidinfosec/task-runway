@@ -4,10 +4,19 @@
     <_LastSelectedProfileId>C:\Users\Day\source\repos\WinFormsApp1\WinFormsApp1\Task Runway C# Source\Properties\PublishProfiles\FolderProfile.pubxml</_LastSelectedProfileId>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Update="EnterToolName.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Update="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Update="Form2.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="quickActions.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="URL.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Update="Update.cs">

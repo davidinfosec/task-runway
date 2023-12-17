@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TaskRunway", "TaskRunway.cs
 EndProject
 Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "TaskRunwaySetup", "..\TaskRunwaySetup\TaskRunwaySetup.vdproj", "{FF5FA411-25C5-4332-A795-3312538E2417}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UpdaterLibrary", "..\UpdaterLibrary\UpdaterLibrary.csproj", "{99131D6F-B3BD-4762-A50C-EA32176FC596}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UpdaterLibrary", "..\UpdaterLibrary\UpdaterLibrary.csproj", "{99131D6F-B3BD-4762-A50C-EA32176FC596}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,10 +21,10 @@ Global
 		{CFCF3540-B282-49A2-83D0-EC53F1D669CD}.Release|Any CPU.Build.0 = Release|Any CPU
 		{FF5FA411-25C5-4332-A795-3312538E2417}.Debug|Any CPU.ActiveCfg = Debug
 		{FF5FA411-25C5-4332-A795-3312538E2417}.Release|Any CPU.ActiveCfg = Release
+		{FF5FA411-25C5-4332-A795-3312538E2417}.Release|Any CPU.Build.0 = Release
 		{99131D6F-B3BD-4762-A50C-EA32176FC596}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{99131D6F-B3BD-4762-A50C-EA32176FC596}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{99131D6F-B3BD-4762-A50C-EA32176FC596}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{99131D6F-B3BD-4762-A50C-EA32176FC596}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

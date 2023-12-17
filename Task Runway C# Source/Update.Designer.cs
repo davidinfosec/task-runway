@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Update));
             label2 = new Label();
             button2 = new Button();
             button3 = new Button();
@@ -37,11 +38,10 @@
             // 
             // label2
             // 
-            label2.AutoSize = true;
-            label2.Font = new Font("Microsoft Sans Serif", 15F, FontStyle.Bold);
-            label2.Location = new Point(18, 7);
+            label2.Font = new Font("Microsoft YaHei", 10F, FontStyle.Bold);
+            label2.Location = new Point(45, 9);
             label2.Name = "label2";
-            label2.Size = new Size(312, 25);
+            label2.Size = new Size(258, 25);
             label2.TabIndex = 15;
             label2.Text = "Task Runway Update Available";
             label2.TextAlign = ContentAlignment.MiddleCenter;
@@ -76,13 +76,14 @@
             // label4
             // 
             label4.Font = new Font("Microsoft JhengHei", 7F, FontStyle.Bold);
-            label4.Location = new Point(67, 32);
+            label4.Location = new Point(19, 45);
             label4.Margin = new Padding(10, 0, 3, 0);
             label4.Name = "label4";
-            label4.Size = new Size(215, 18);
+            label4.Size = new Size(311, 18);
             label4.TabIndex = 21;
-            label4.Text = "We detected a new version available!";
+            label4.Text = "An update is available! Your current version: 1.0.4.2";
             label4.TextAlign = ContentAlignment.MiddleCenter;
+            label4.Click += label4_Click;
             // 
             // Update
             // 
@@ -94,10 +95,10 @@
             Controls.Add(button3);
             Controls.Add(button2);
             Controls.Add(label2);
+            Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "Update";
             Text = "Check for Updates";
             ResumeLayout(false);
-            PerformLayout();
         }
     }
 }
