@@ -81,7 +81,7 @@
             label4.Name = "label4";
             label4.Size = new Size(311, 18);
             label4.TabIndex = 21;
-            label4.Text = "An update is available! Your current version: 1.0.4.2";
+            label4.Text = "An update is available! Your current version: 1.0.4.3";
             label4.TextAlign = ContentAlignment.MiddleCenter;
             label4.Click += label4_Click;
             // 

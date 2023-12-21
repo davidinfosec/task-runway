@@ -6,6 +6,7 @@ namespace TaskRunway
     public partial class TaskRunwayExplorer : Form
     {
         private List<ToolInfo> tools = new List<ToolInfo>();
+        private Dictionary<string, string> documentationLinks = new Dictionary<string, string>();
         private Dictionary<string, string> programFolderMapping = new Dictionary<string, string>();
         private string downloadFolderPath;
         private Form1 form1;
@@ -15,9 +16,15 @@ namespace TaskRunway
             InitializeComponent();
             this.form1 = form1;
 
+
+            // Add event handlers
+            this.checkedListBox1.SelectedIndexChanged += new EventHandler(this.CheckedListBox_SelectedIndexChanged);
+            this.checkedListBox2.SelectedIndexChanged += new EventHandler(this.CheckedListBox_SelectedIndexChanged);
+
             // Add the following lines to disable maximize button and resizing
             this.MaximizeBox = false;
             this.FormBorderStyle = FormBorderStyle.FixedSingle;
+
 
 
             AddTool(new ToolInfo
@@ -27,7 +34,8 @@ namespace TaskRunway
                 TargetFileName = "taskrunway_cli",
                 ExtractType = ExtractType.Zip,
                 TargetFileExtension = ".py",
-                ToolDescription = "Command Line Interface for Task Runway"
+                ToolDescription = "Command Line Interface for Task Runway",
+                DocumentationLink = "https://taskrunway.com"
             });
 
             AddTool(new ToolInfo
@@ -37,7 +45,8 @@ namespace TaskRunway
                 TargetFileName = "downloadclip",
                 ExtractType = ExtractType.Zip,
                 TargetFileExtension = ".py",
-                ToolDescription = "DavidInfosec DownloadClip tool"
+                ToolDescription = "DavidInfosec DownloadClip tool",
+                DocumentationLink = "https://github.com/davidinfosec/downloadclip"
             });
 
             AddTool(new ToolInfo
@@ -47,7 +56,8 @@ namespace TaskRunway
                 TargetFileName = "iptool",
                 ExtractType = ExtractType.Zip,
                 TargetFileExtension = ".py",
-                ToolDescription = "IP API Tool to retrieve geolocation data to CSV."
+                ToolDescription = "IP API Tool to retrieve geolocation data to CSV.",
+                DocumentationLink = "https://github.com/davidinfosec/IP-Tool"
             });
 
             AddTool(new ToolInfo
@@ -57,8 +67,10 @@ namespace TaskRunway
                 TargetFileName = "main",
                 ExtractType = ExtractType.Zip,
                 TargetFileExtension = ".py",
-                ToolDescription = "Command-line tool to filter expiring domains by configurable criteria"
+                ToolDescription = "Command-line tool to filter expiring domains by configurable criteria,",
+                DocumentationLink = "https://github.com/crock/dropfilter-cli"
             });
+
 
             AddTool(new ToolInfo
             {
@@ -67,8 +79,10 @@ namespace TaskRunway
                 TargetFileName = "sp",
                 ExtractType = ExtractType.Zip,
                 TargetFileExtension = ".py",
-                ToolDescription = "Command line, enter Spotify link, get YouTube link"
+                ToolDescription = "Command line, enter Spotify link, get YouTube link,",
+                DocumentationLink = "https://github.com/davidinfosec/sp.py"
             });
+
 
             AddTool(new ToolInfo
             {
@@ -77,8 +91,10 @@ namespace TaskRunway
                 TargetFileName = "whois",
                 ExtractType = ExtractType.Zip,
                 TargetFileExtension = ".py",
-                ToolDescription = "Command line WHOIS API tool"
+                ToolDescription = "Command line WHOIS API tool,",
+                DocumentationLink = "https://github.com/davidinfosec/whois-domain-info"
             });
+
 
             AddTool(new ToolInfo
             {
@@ -87,8 +103,10 @@ namespace TaskRunway
                 TargetFileName = "etgen",
                 ExtractType = ExtractType.Zip,
                 TargetFileExtension = ".py",
-                ToolDescription = "Weekly Folder template structure generator"
+                ToolDescription = "Weekly Folder template structure generator,",
+                DocumentationLink = "https://github.com/davidinfosec/Easy-Template"
             });
+
 
             AddTool(new ToolInfo
             {
@@ -97,8 +115,10 @@ namespace TaskRunway
                 TargetFileName = "dnn",
                 ExtractType = ExtractType.Zip,
                 TargetFileExtension = ".py",
-                ToolDescription = "Wordlist textfuser to find available domain names"
+                ToolDescription = "Wordlist textfuser to find available domain names,",
+                DocumentationLink = "https://github.com/davidinfosec/Domain-Name-Ninja"
             });
+
 
 
             // Add other tools similarly
@@ -109,8 +129,34 @@ namespace TaskRunway
                 Directory.CreateDirectory(downloadFolderPath);
             }
 
+            // Add items to checkedListBox2 and their documentation links to the dictionary
+            checkedListBox2.Items.Add("OsintFramework.com");
+            documentationLinks["OsintFramework.com"] = "http://osintframework.com";
+
             checkedListBox2.Items.Add("ReportName.com");
+            documentationLinks["ReportName.com"] = "http://reportname.com/about";
         }
+
+
+        private void CheckedListBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (sender == checkedListBox1 && checkedListBox1.SelectedIndex != -1)
+            {
+                // Clear selection in the second CheckedListBox
+                checkedListBox2.ClearSelected();
+            }
+            else if (sender == checkedListBox2 && checkedListBox2.SelectedIndex != -1)
+            {
+                // Clear selection in the first CheckedListBox
+                checkedListBox1.ClearSelected();
+            }
+        }
+
+
+
+
+
+
 
         private async void button1_Click_1(object sender, EventArgs e)
         {
@@ -385,8 +431,20 @@ namespace TaskRunway
 
         private void checkedListBox3_SelectedIndexChanged(object sender, EventArgs e)
         {
-            // Leave it empty for now
+            if (checkedListBox3.SelectedIndex != -1)
+            {
+                string selectedItem = checkedListBox3.SelectedItem.ToString();
+                if (tools.FirstOrDefault(t => t.Name == selectedItem && !string.IsNullOrEmpty(t.DocumentationLink)) != null)
+                {
+                    button3.Visible = true; // Show button if documentation link exists
+                }
+                else
+                {
+                    button3.Visible = false; // Hide button if no documentation link
+                }
+            }
         }
+
 
         private void checkedListBox2_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -412,6 +470,47 @@ namespace TaskRunway
             public ExtractType ExtractType { get; set; }
             public string TargetFileExtension { get; set; }
             public string ToolDescription { get; set; }
+            public string DocumentationLink { get; set; }
         }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            string selectedItem = null;
+            string documentationLink = null;
+
+            if (checkedListBox1.SelectedItem != null)
+            {
+                selectedItem = checkedListBox1.SelectedItem.ToString();
+                var tool = tools.FirstOrDefault(t => t.Name == selectedItem);
+                documentationLink = tool?.DocumentationLink;
+            }
+            else if (checkedListBox2.SelectedItem != null)
+            {
+                selectedItem = checkedListBox2.SelectedItem.ToString();
+                documentationLinks.TryGetValue(selectedItem, out documentationLink);
+            }
+
+            if (!string.IsNullOrEmpty(documentationLink))
+            {
+                try
+                {
+                    Process.Start(new ProcessStartInfo
+                    {
+                        FileName = documentationLink,
+                        UseShellExecute = true
+                    });
+                }
+                catch
+                {
+                    MessageBox.Show("Could not open the documentation link.");
+                }
+            }
+            else
+            {
+                MessageBox.Show("No documentation link available for the selected item.");
+            }
+        }
+
+
     }
 }

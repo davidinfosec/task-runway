@@ -1,4 +1,4 @@
-﻿// Task_Runway_x64, Version=1.0.4.2, Culture=neutral, PublicKeyToken=null
+﻿// Task_Runway_x64, Version=1.0.4.3, Culture=neutral, PublicKeyToken=null
 // Form1
 using System;
 using System.Collections;
@@ -18,7 +18,6 @@ using UpdaterApp;
 using System.Text.Json;
 using static Form1;
 using Microsoft.VisualBasic.Devices;
-
 
 
 public class Form1 : Form
@@ -52,8 +51,10 @@ public class Form1 : Form
 
     private bool isManualCheck = false;
 
+    public int CountdownValue { get; set; }
 
-
+    private int countdownTime = 25 * 60; // 25 minutes in seconds
+    private bool isTimerRunning = false;
 
     public class Preferences
     {
@@ -61,8 +62,9 @@ public class Form1 : Form
         public bool AlwaysOnTop { get; set; }
         public bool MinimizeToTrayOnClose { get; set; }
         public bool? DarkMode { get; set; }
-        public bool DarkModePurchased { get; set; }
-
+        public bool SupporterLicensePurchased { get; set; } // Tracks if any supporter license has been purchased
+        public bool? PomodoroTimerEnabled { get; set; }
+  
 
 
         // Load preferences from a JSON file
@@ -172,7 +174,7 @@ public class Form1 : Form
     private quickActions quickActionsForm;
     private ToolStripMenuItem quickActionsMenuItem;
 
-    
+    TaskRunway.Timer timerForm = new TaskRunway.Timer();
     private void ExploreNewTools()
     {
         form2 = new TaskRunwayExplorer(this);
@@ -194,7 +196,7 @@ public class Form1 : Form
         InitializeComponent();
         InitializeQuickLaunchMenu();
 
-
+        
         this.MouseDown += new MouseEventHandler(Form1_MouseDown);
 
 
@@ -213,7 +215,7 @@ public class Form1 : Form
         this.KeyDown += new KeyEventHandler(Form_KeyDown);
         label1.TabStop = true;
 
-        currentVersion = new Version("1.0.4.2");
+        currentVersion = new Version("1.0.4.3");
         InitializeContextMenu();
         textBox1.TextChanged += textBox1_TextChanged;
         textBox1.KeyDown += textBox1_KeyDown;
@@ -225,6 +227,7 @@ public class Form1 : Form
         listBox1.MouseWheel += listBox1_MouseWheel;
         listBox1.SelectionMode = SelectionMode.MultiExtended;
 
+        preferences.PomodoroTimerEnabled = preferences.PomodoroTimerEnabled ?? false; // Default to false if not set
 
 
         // Initialize Preferences
@@ -1143,9 +1146,9 @@ public class Form1 : Form
         // Check if Ctrl key is held down and not in a search
         if (e.Control && !isSearchActive)
         {
-            // Handle Ctrl+Up and Ctrl+Down to prevent the default behavior
             if (e.KeyCode == Keys.Up || e.KeyCode == Keys.Down)
             {
+                // Handle Ctrl+Up and Ctrl+Down to prevent the default behavior
                 e.Handled = true;
                 e.SuppressKeyPress = true;
 
@@ -1155,13 +1158,42 @@ public class Form1 : Form
                 // Move the selected item based on the direction
                 MoveItem(listBox1.SelectedIndex, direction, true);
             }
+            else if (e.KeyCode == Keys.C)
+            {
+                // Handle Ctrl+C to copy the path of the selected tool
+                CopyPath();
+                e.Handled = true;
+            }
+            else if (e.KeyCode == Keys.X && e.Shift)
+            {
+                // Handle Ctrl+Shift+X to copy the name of the selected tool
+                CopyName();
+                e.Handled = true;
+            }
         }
         else if (e.KeyCode == Keys.Enter)
         {
             // If Enter key is pressed, launch the selected tools
             LaunchSelectedTool();
+            e.Handled = true;
         }
     }
+
+    private void CopyName()
+    {
+        int selectedIndex = listBox1.SelectedIndex;
+        if (selectedIndex >= 0 && selectedIndex < tools.Count)
+        {
+            ScriptingTool selectedTool = tools[selectedIndex];
+            Clipboard.SetText(selectedTool.Name);
+        }
+        else
+        {
+            MessageBox.Show("Please select a valid tool to copy its name.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Hand);
+        }
+    }
+
+
 
 
     private void listBox1_KeyUp(object sender, KeyEventArgs e)
@@ -1677,7 +1709,8 @@ public class Form1 : Form
     {
         listBox1.Items.Clear();
 
-        List<ScriptingTool> toolsToDisplay = items ?? tools;
+        // Determine which list to use for populating listBox1
+        List<ScriptingTool> toolsToDisplay = isSearchActive ? filteredTools : tools;
 
         foreach (ScriptingTool tool in toolsToDisplay)
         {
@@ -1742,8 +1775,9 @@ public class Form1 : Form
             .ToList();
 
         // Update the ListBox with the filtered tools for search
-        UpdateListBox(filteredTools);
+        UpdateListBox();
     }
+
 
 
 
@@ -1816,6 +1850,7 @@ public class Form1 : Form
         label5 = new Label();
         textBox1 = new TextBox();
         notifyIcon = new NotifyIcon(components);
+        label6 = new Label();
         SuspendLayout();
         // 
         // button1
@@ -1882,7 +1917,7 @@ public class Form1 : Form
         // 
         label1.AutoSize = true;
         label1.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
-        label1.ForeColor = SystemColors.ButtonFace;
+        label1.ForeColor = SystemColors.ActiveCaptionText;
         label1.Location = new Point(12, 62);
         label1.Name = "label1";
         label1.Size = new Size(51, 15);
@@ -2003,13 +2038,27 @@ public class Form1 : Form
         notifyIcon.Icon = (Icon)resources.GetObject("notifyIcon.Icon");
         notifyIcon.Text = "Task Runway";
         // 
+        // label6
+        // 
+        label6.AutoSize = true;
+        label6.BackColor = SystemColors.ActiveCaptionText;
+        label6.Location = new Point(178, 16);
+        label6.Name = "label6";
+        label6.Size = new Size(37, 15);
+        label6.TabIndex = 18;
+        label6.Tag = "Timer";
+        label6.Text = "Timer";
+        label6.Visible = false;
+        // 
         // Form1
         // 
+        AccessibleRole = AccessibleRole.None;
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
         AutoSize = true;
         BackColor = SystemColors.ButtonFace;
         ClientSize = new Size(240, 311);
+        Controls.Add(label6);
         Controls.Add(textBox1);
         Controls.Add(label5);
         Controls.Add(label4);
@@ -2026,6 +2075,7 @@ public class Form1 : Form
         ForeColor = SystemColors.ButtonFace;
         FormBorderStyle = FormBorderStyle.None;
         Icon = (Icon)resources.GetObject("$this.Icon");
+        MaximizeBox = false;
         Name = "Form1";
         Text = "Task Runway";
         Load += Form1_Load;
@@ -2072,29 +2122,41 @@ public class Form1 : Form
 
     private void DeleteItem(int index)
     {
-        if (index >= 0 && index < tools.Count)
+        if (index >= 0 && index < (isSearchActive ? filteredTools : tools).Count)
         {
-            ScriptingTool deletedTool = tools[index];
+            var currentList = isSearchActive ? filteredTools : tools;
+            ScriptingTool deletedTool = currentList[index];
 
             // Record the deletion in the undo stack
             undoStack.Push(new UndoOperation
             {
                 Type = OperationType.Delete,
                 Tool = deletedTool,
-                OriginalIndex = index
+                OriginalIndex = tools.IndexOf(deletedTool)
             });
 
             // Remove the tool from all relevant lists
-            tools.RemoveAt(index);
-            filteredTools.RemoveAt(index); // Update if filteredTools is in sync with tools
-            originalOrderTools.RemoveAt(index); // Update if originalOrderTools is in sync with tools
+            tools.Remove(deletedTool);
+            originalOrderTools.Remove(deletedTool);
+            filteredTools.Remove(deletedTool); // Update if filteredTools is in sync with tools
 
             // Update UI and save changes
-            UpdateListBox();
             SaveToolsToConfig();
             LoadToolsFromConfig();
+
+            // Refresh the list based on the search
+            if (isSearchActive)
+            {
+                PerformSearch();
+            }
+            else
+            {
+                UpdateListBox();
+            }
         }
     }
+
+
 
 
 
@@ -2174,17 +2236,17 @@ public class Form1 : Form
 
         darkModeItem.Click += delegate
         {
-            if (!preferences.DarkModePurchased)
+            if (!preferences.SupporterLicensePurchased)
             {
                 if (MessageBox.Show("Have you purchased a Supporter's License Key?", "License Check", MessageBoxButtons.YesNo) == DialogResult.Yes)
                 {
-                    preferences.DarkModePurchased = true; // Save the purchase status
-                    preferences.DarkMode = darkModeItem.Checked;
+                    preferences.SupporterLicensePurchased = true; // Set this flag to true for all features
                 }
                 else
                 {
-                    MessageBox.Show("Dark Mode is restricted to supporters only. Please purchase a $10 Supporter's License by clicking 'Donate' on the main menu.", "License Required", MessageBoxButtons.OK);
+                    MessageBox.Show("This feature is restricted to supporters only. Please purchase a Supporter's License.", "License Required", MessageBoxButtons.OK);
                     darkModeItem.Checked = false; // Reset the check
+                    return; // Exit the event handler early
                 }
             }
             else
@@ -2207,7 +2269,40 @@ public class Form1 : Form
 
         contextMenu.Items.Add(darkModeItem);
 
+        /*
+        // Create the Pomodoro Timer menu item
+        ToolStripMenuItem pomodoroTimerItem = new ToolStripMenuItem("Pomodoro Timer");
+        pomodoroTimerItem.CheckOnClick = true;
+        pomodoroTimerItem.Checked = preferences.PomodoroTimerEnabled ?? false; // Default to false if not set
 
+        pomodoroTimerItem.Click += delegate
+        {
+            if (!preferences.SupporterLicensePurchased)
+            {
+                if (MessageBox.Show("Have you purchased a Supporter's License Key?", "License Check", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                {
+                    preferences.SupporterLicensePurchased = true;
+                }
+                else
+                {
+                    MessageBox.Show("This feature is restricted to supporters only. Please purchase a Supporter's License.", "License Required", MessageBoxButtons.OK);
+                    pomodoroTimerItem.Checked = false;
+                    return;
+                }
+            }
+            else
+            {
+                preferences.PomodoroTimerEnabled = pomodoroTimerItem.Checked; // Update the preference
+            }
+
+            // Here you can add code to enable/disable the Pomodoro Timer based on the checked state
+            TogglePomodoroTimer(pomodoroTimerItem.Checked);
+
+            preferences.SavePreferences(preferencesFilePath); // Save the updated preferences
+        };
+
+        contextMenu.Items.Add(pomodoroTimerItem);
+        */
 
         ToolStripMenuItem customFlagsItem = new ToolStripMenuItem("Custom Flags");
         customFlagsItem.Click += delegate
@@ -2307,6 +2402,68 @@ public class Form1 : Form
 
 
         contextMenu.Show(button5, new Point(0, button5.Height));
+    }
+
+    private void TogglePomodoroTimer(bool enable)
+    {
+        if (enable)
+        {
+            // Code to enable Pomodoro Timer
+
+            // Show label6
+            label6.Visible = true;
+        }
+        else
+        {
+            // Code to disable Pomodoro Timer
+
+            // Hide label6
+            label6.Visible = false;
+        }
+    }
+
+    // Assuming you have a reference to the Timer form as timerForm
+    private void label6_Click(object sender, EventArgs e)
+    {
+        if (isTimerRunning)
+        {
+            timer1.Stop(); // Pause the timer
+            isTimerRunning = false;
+        }
+        else
+        {
+            timer1.Start(); // Start or resume the timer
+            isTimerRunning = true;
+        }
+    }
+
+
+    private void label6_DoubleClick(object sender, EventArgs e)
+    {
+        countdownTime = 25 * 60; // Reset the countdown to 25 minutes
+        UpdateLabel(); // Update the label to display the new time
+    }
+
+
+    private void timer1_Tick(object sender, EventArgs e)
+    {
+        if (countdownTime > 0)
+        {
+            countdownTime--;
+            UpdateLabel();
+        }
+        else
+        {
+            timer1.Stop(); // Stop the timer when the countdown reaches zero
+            isTimerRunning = false;
+        }
+    }
+
+    private void UpdateLabel()
+    {
+        int minutes = countdownTime / 60;
+        int seconds = countdownTime % 60;
+        label6.Text = $"{minutes:D2}:{seconds:D2}";
     }
 
 
@@ -2462,7 +2619,7 @@ public class Form1 : Form
         textBox1.TextAlign = HorizontalAlignment.Center;
 
         // Form properties
-        this.BackColor = SystemColors.ButtonFace;
+        this.BackColor = Color.Blue;
         this.ForeColor = SystemColors.ButtonFace;
 
         // Refresh the form to apply the changes
@@ -2793,16 +2950,14 @@ public class Form1 : Form
         if (selectedIndex >= 0 && selectedIndex < tools.Count)
         {
             ScriptingTool selectedTool = tools[selectedIndex];
-            if (selectedTool.Path.EndsWith(".bat", StringComparison.OrdinalIgnoreCase) || selectedTool.Path.EndsWith(".py", StringComparison.OrdinalIgnoreCase) || selectedTool.Path.EndsWith(".ps1", StringComparison.OrdinalIgnoreCase))
-            {
-                Clipboard.SetText(selectedTool.Path);
-            }
-            else
-            {
-                MessageBox.Show("This action is only compatible with a script.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Hand);
-            }
+            Clipboard.SetText(selectedTool.Path);
+        }
+        else
+        {
+            MessageBox.Show("Please select a valid tool to copy its path.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Hand);
         }
     }
+
 
     private void CopyFlags()
     {
@@ -2812,7 +2967,7 @@ public class Form1 : Form
             ScriptingTool selectedTool = tools[selectedIndex];
             if (!selectedTool.Path.EndsWith(".bat", StringComparison.OrdinalIgnoreCase) && !selectedTool.Path.EndsWith(".py", StringComparison.OrdinalIgnoreCase) && !selectedTool.Path.EndsWith(".ps1", StringComparison.OrdinalIgnoreCase))
             {
-                MessageBox.Show("This action is only compatible with a script.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Hand);
+                MessageBox.Show("This action is only compatible with scripts, programs, and folders.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Hand);
             }
         }
     }
@@ -3020,4 +3175,5 @@ public class Form1 : Form
     private TreeView treeView1;
     private ContextMenuStrip contextMenuStrip1;
     private ToolStripMenuItem toolStripMenuItem1;
+    private Label label6;
 }

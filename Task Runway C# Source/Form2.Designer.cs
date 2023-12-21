@@ -39,6 +39,7 @@
             checkedListBox3 = new CheckedListBox();
             label6 = new Label();
             button2 = new Button();
+            button3 = new Button();
             SuspendLayout();
             // 
             // label2
@@ -69,7 +70,7 @@
             checkedListBox1.FormattingEnabled = true;
             checkedListBox1.Location = new Point(19, 80);
             checkedListBox1.Name = "checkedListBox1";
-            checkedListBox1.Size = new Size(142, 148);
+            checkedListBox1.Size = new Size(142, 166);
             checkedListBox1.TabIndex = 18;
             // 
             // label1
@@ -99,14 +100,20 @@
             checkedListBox2.FormattingEnabled = true;
             checkedListBox2.Location = new Point(167, 80);
             checkedListBox2.Name = "checkedListBox2";
-            checkedListBox2.Size = new Size(143, 148);
+            checkedListBox2.Size = new Size(143, 166);
             checkedListBox2.TabIndex = 20;
             // 
             // button1
             // 
+            button1.FlatAppearance.BorderColor = Color.Black;
+            button1.FlatAppearance.MouseDownBackColor = Color.LimeGreen;
+            button1.FlatAppearance.MouseOverBackColor = Color.LimeGreen;
+            button1.FlatStyle = FlatStyle.Flat;
+            button1.Font = new Font("Calibri", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            button1.ForeColor = SystemColors.ActiveCaptionText;
             button1.Location = new Point(20, 252);
             button1.Name = "button1";
-            button1.Size = new Size(290, 28);
+            button1.Size = new Size(141, 28);
             button1.TabIndex = 22;
             button1.Text = "Download / Add";
             button1.UseVisualStyleBackColor = true;
@@ -133,6 +140,12 @@
             // 
             // button2
             // 
+            button2.FlatAppearance.BorderColor = Color.Black;
+            button2.FlatAppearance.MouseDownBackColor = Color.Red;
+            button2.FlatAppearance.MouseOverBackColor = Color.LightCoral;
+            button2.FlatStyle = FlatStyle.Flat;
+            button2.Font = new Font("Calibri", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            button2.ForeColor = SystemColors.ActiveCaptionText;
             button2.Location = new Point(334, 252);
             button2.Name = "button2";
             button2.Size = new Size(143, 28);
@@ -141,11 +154,26 @@
             button2.UseVisualStyleBackColor = true;
             button2.Click += button2_Click_1;
             // 
+            // button3
+            // 
+            button3.FlatAppearance.BorderColor = Color.Black;
+            button3.FlatStyle = FlatStyle.Flat;
+            button3.Font = new Font("Calibri", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            button3.ForeColor = SystemColors.ActiveCaptionText;
+            button3.Location = new Point(167, 252);
+            button3.Name = "button3";
+            button3.Size = new Size(141, 28);
+            button3.TabIndex = 27;
+            button3.Text = "View Documentation";
+            button3.UseVisualStyleBackColor = true;
+            button3.Click += button3_Click;
+            // 
             // TaskRunwayExplorer
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(497, 292);
+            Controls.Add(button3);
             Controls.Add(button2);
             Controls.Add(label6);
             Controls.Add(checkedListBox3);
@@ -175,5 +203,6 @@
         private Label label6;
         private Button button2;
         private Label label5;
+        private Button button3;
     }
 }
