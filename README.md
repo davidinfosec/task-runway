@@ -1,6 +1,7 @@
 # Task Runway Documentation
 
-![explorer_5q74JXyN6j](https://github.com/davidinfosec/task-runway/assets/87215831/106245a9-5313-4a98-8fd0-b60e354d6140)
+![vmware_55if7b92Lp](https://github.com/davidinfosec/task-runway/assets/87215831/d90823c8-509f-44bf-bd5c-61fb47595be4)
+
 
 Task Runway is an **open-source application** designed as a central location to take flight into your favorite tools. It is developed in C#, with alternative versions in Python available.
 
