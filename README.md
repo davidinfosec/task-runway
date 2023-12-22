@@ -16,21 +16,6 @@ As efforts to support the development and support of Task Runway, a [$10 donatio
 Click [here](https://taskrunway.com/install) to download the latest version!
 
 
-### Latest Versions Summary:
-
-### Task Runway 1.0.3 Release and Beyond, Featuring: Automatic Updates
-
-Bug changes will be coming soon in v1.0.3 to address some of the issues mentioned at https://taskrunway.com/issues
-
-## Task Runway v1.0.2/v1.0.3 Release: Featuring: Automatic Updates
-
-This update features one major addition, automatic updating. The reason I wanted to get this release out quickly is because it will allow me to patch bugs while understanding that users may not want to have to keep updating their installation. 
-
-Automatic updates are handled with an UpdaterApp.exe, which will periodically download from this repository for updates.
-
-Version 1.0.3 is the automatic update (1.0.2) with some bug fixes. The reason I have separated these into separate versions is to test the auto-update feature more thoroughly.
-
-
 # About Task Runway
 
 ## C# GUI - x64 Executable (Recommended)
