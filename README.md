@@ -13,6 +13,8 @@ As efforts to support the development and support of Task Runway, a [$10 donatio
 - New context menu for Edit Path; fixed to appear on top, even if Task Runway is set for Always-On-Top.
 - Selection bug for rename/edit path fixed and will now properly deselect other items.
 
+  ** if your autoupdater is having issues, I apologize; please download the installer below. I am looking into why this is behaving strangely! **
+
 Click [here](https://taskrunway.com/install) to download the latest version!
 
 
