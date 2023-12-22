@@ -6,18 +6,12 @@ Task Runway is an **open-source application** designed as a central location to 
 
 As efforts to support the development and support of Task Runway, a [$10 donation is strongly encouraged](https://www.davidinfosec.com/donate) if you find value with this application. **With your contribution you will receive an exclusive Supporter's License Key.** Please take your time to evaluate before donating. We want to keep things light-weight and open source.
 
-
-## Task Runway v1.0.4 Release: .lnk and file:/// support, improved management of resources 
-
-**This update's notable changes:**
-- icon file no longer required to launch (bug)
-- Fixed item position in list box on removal.
-- Corrected undo behavior for item order.
-- Improved undo logic for multiple functions.
-- Enabled undo after item addition.
-- Added "file:///" support
-- Added .lnk support, which allows you to now link Windows file shortcuts.
-- Introduced "http://" default for URLs, a quicker way to add a website.
+# Task Runway 1.0.4.4 Patchnotes
+- More inuitive experience between switching from the search bar and listbox items. 
+- Patched bugs that were present in CTRL + C // CTRL + SHIFT + X hotkeys.
+- Added Ctrl + K back for searchbar focus. Escape key to cancel search now works globally.
+- New context menu for Edit Path; fixed to appear on top, even if Task Runway is set for Always-On-Top.
+- Selection bug for rename/edit path fixed and will now properly deselect other items.
 
 Click [here](https://taskrunway.com/install) to download the latest version!
 
