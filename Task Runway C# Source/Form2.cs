@@ -123,7 +123,7 @@ namespace TaskRunway
 
             // Add other tools similarly
 
-            downloadFolderPath = Path.Combine(Application.StartupPath, "Downloaded Tools");
+            downloadFolderPath = System.IO.Path.Combine(Application.StartupPath, "Downloaded Tools");
             if (!Directory.Exists(downloadFolderPath))
             {
                 Directory.CreateDirectory(downloadFolderPath);
@@ -175,7 +175,7 @@ namespace TaskRunway
                         string scriptConfig = tool.TargetFileName;
 
                         // Append scriptConfig to the path
-                        string finalPath = Path.Combine(filePath, $"{tool.TargetFileName}{tool.TargetFileExtension}");
+                        string finalPath = System.IO.Path.Combine(filePath, $"{tool.TargetFileName}{tool.TargetFileExtension}");
 
                         // Check if custom_flags is specified
                         string customFlagsLine = string.IsNullOrEmpty(tool.ToolDescription) ? "" : $"custom_flags={tool.ToolDescription}";
@@ -231,7 +231,7 @@ namespace TaskRunway
             {
                 if (programFolderMapping.TryGetValue(tool.Name, out var folderName))
                 {
-                    string folderPath = Path.Combine(downloadFolderPath, folderName);
+                    string folderPath = System.IO.Path.Combine(downloadFolderPath, folderName);
 
                     // Check if the folder exists before adding it to the list
                     if (Directory.Exists(folderPath))
@@ -257,12 +257,12 @@ namespace TaskRunway
                 response.EnsureSuccessStatusCode();
 
                 string fileName = tool.TargetFileName + tool.TargetFileExtension;
-                string filePath = Path.Combine(destinationFolder, fileName);
+                string filePath = System.IO.Path.Combine(destinationFolder, fileName);
 
                 if (tool.ExtractType == ExtractType.Zip)
                 {
                     await DownloadAndExtractZipAsync(response, filePath, fileName);
-                    return Path.Combine(destinationFolder, Path.GetFileNameWithoutExtension(fileName));
+                    return System.IO.Path.Combine(destinationFolder, System.IO.Path.GetFileNameWithoutExtension(fileName));
                 }
                 else
                 {
@@ -286,7 +286,7 @@ namespace TaskRunway
             using (Stream stream = await response.Content.ReadAsStreamAsync())
             using (ZipArchive archive = new ZipArchive(stream))
             {
-                string subfolderPath = Path.Combine(Path.GetDirectoryName(filePath), Path.GetFileNameWithoutExtension(filePath));
+                string subfolderPath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(filePath), System.IO.Path.GetFileNameWithoutExtension(filePath));
                 Directory.CreateDirectory(subfolderPath);
 
                 foreach (ZipArchiveEntry entry in archive.Entries)
@@ -303,10 +303,10 @@ namespace TaskRunway
                         entryPath = entryPath.Substring(indexOfFirstSlash + 1);
                     }
 
-                    string entryTargetPath = Path.Combine(subfolderPath, entryPath);
+                    string entryTargetPath = System.IO.Path.Combine(subfolderPath, entryPath);
 
                     // Create directories if they don't exist yet
-                    string directoryPath = Path.GetDirectoryName(entryTargetPath);
+                    string directoryPath = System.IO.Path.GetDirectoryName(entryTargetPath);
                     if (!Directory.Exists(directoryPath))
                     {
                         Directory.CreateDirectory(directoryPath);
@@ -345,7 +345,7 @@ namespace TaskRunway
 
                 if (programFolderMapping.TryGetValue(programName, out var folderName))
                 {
-                    string itemPath = Path.Combine(downloadFolderPath, folderName);
+                    string itemPath = System.IO.Path.Combine(downloadFolderPath, folderName);
 
                     if (IsProgram(folderName))
                     {
@@ -377,14 +377,14 @@ namespace TaskRunway
 
         private bool IsProgram(string itemName)
         {
-            return Directory.Exists(Path.Combine(downloadFolderPath, itemName));
+            return Directory.Exists(System.IO.Path.Combine(downloadFolderPath, itemName));
         }
 
         private bool IsProgramRunning(string folderPath)
         {
             try
             {
-                Process[] processes = Process.GetProcessesByName(Path.GetFileNameWithoutExtension(folderPath));
+                Process[] processes = Process.GetProcessesByName(System.IO.Path.GetFileNameWithoutExtension(folderPath));
                 return processes.Length > 0;
             }
             catch (Exception)
@@ -406,7 +406,7 @@ namespace TaskRunway
         {
             if (programFolderMapping.TryGetValue(selectedItem, out var folderName))
             {
-                string folderPath = Path.Combine(downloadFolderPath, folderName);
+                string folderPath = System.IO.Path.Combine(downloadFolderPath, folderName);
 
                 if (IsProgram(folderName))
                 {

@@ -1,4 +1,4 @@
-﻿// Task_Runway_x64, Version=1.0.4.3, Culture=neutral, PublicKeyToken=null
+﻿// Task_Runway_x64, Version=1.0.4.4, Culture=neutral, PublicKeyToken=null
 // Form1
 using System;
 using System.Collections;
@@ -215,7 +215,7 @@ public class Form1 : Form
         this.KeyDown += new KeyEventHandler(Form_KeyDown);
         label1.TabStop = true;
 
-        currentVersion = new Version("1.0.4.3");
+        currentVersion = new Version("1.0.4.4");
         InitializeContextMenu();
         textBox1.TextChanged += textBox1_TextChanged;
         textBox1.KeyDown += textBox1_KeyDown;
@@ -225,6 +225,7 @@ public class Form1 : Form
         base.FormBorderStyle = FormBorderStyle.FixedSingle;
         listBox1.KeyDown += listBox1_KeyDown;
         listBox1.MouseWheel += listBox1_MouseWheel;
+        listBox1.KeyPress += listBox1_KeyPress;
         listBox1.SelectionMode = SelectionMode.MultiExtended;
 
         preferences.PomodoroTimerEnabled = preferences.PomodoroTimerEnabled ?? false; // Default to false if not set
@@ -428,10 +429,21 @@ public class Form1 : Form
 
 
 
-
     private void Form_KeyDown(object sender, KeyEventArgs e)
     {
-       
+        // Check if Ctrl is held down and the pressed key is K
+        if (e.Control && e.KeyCode == Keys.K)
+        {
+            textBox1.Focus(); // Set focus to textBox1
+        }
+        // Check if the pressed key is Escape
+        else if (e.KeyCode == Keys.Escape)
+        {
+            textBox1.Text = string.Empty; // Clear the text in textBox1
+
+            // Optionally, if you want to reset focus to another control like listBox1
+            listBox1.Focus();
+        }
     }
 
 
@@ -450,11 +462,12 @@ public class Form1 : Form
 
 
 
-    private async Task<(string status, string downloadLink, string version)> GetUpdateStatus()
+
+        private async Task<(string status, string downloadLink, string version)> GetUpdateStatus()
     {
         // Replace this URL with the actual URL of your version.txt file on the server
         var versionFileUrl = "https://raw.githubusercontent.com/davidinfosec/task-runway/main/version.txt";
-        var tempVersionFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "versioncheck.txt");
+        var tempVersionFile = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "versioncheck.txt");
 
         try
         {
@@ -799,8 +812,8 @@ public class Form1 : Form
             int index = listBox1.IndexFromPoint(e.Location);
             if (index != ListBox.NoMatches)
             {
-                listBox1.SelectedIndex = index;
-                listBox1.ContextMenuStrip = listBoxContextMenu;
+                listBox1.ClearSelected(); // Clear existing selection
+                listBox1.SelectedIndex = index; // Select the item that was right-clicked
             }
             else
             {
@@ -813,6 +826,7 @@ public class Form1 : Form
 
 
 
+
     private void InitializeContextMenu()
     {
         listBoxContextMenu = new ContextMenuStrip();
@@ -820,11 +834,13 @@ public class Form1 : Form
 
         // Edit Path
         ToolStripMenuItem editPathItem = new ToolStripMenuItem("Edit Path");
-        editPathItem.Click += delegate
+        editPathItem.Click += (sender, e) =>
         {
             EditPath();
         };
         listBoxContextMenu.Items.Add(editPathItem);
+
+
 
         // ... (existing code)
 
@@ -961,52 +977,56 @@ public class Form1 : Form
 
     private void EditPath()
     {
-        // Get the selected index from the ListBox
         int selectedIndex = listBox1.SelectedIndex;
-
-        // Check if the selected index is within the valid range of filteredTools
         if (selectedIndex >= 0 && selectedIndex < filteredTools.Count)
         {
-            // Retrieve the selected tool from filteredTools
             ScriptingTool selectedTool = filteredTools[selectedIndex];
-
-            // Use InputBox or any other UI element to get the new path
             string currentPath = selectedTool.Path;
-            string newPath = Interaction.InputBox("Enter the new path:", "Edit Path", currentPath);
 
-            // Check if the new path is not empty or null
-            if (!string.IsNullOrWhiteSpace(newPath) && newPath != currentPath)
+            using (PathForm pathForm = new PathForm())
             {
-                // Record the path change in undoStack
-                undoStack.Push(new UndoOperation
-                {
-                    Type = OperationType.PathChange,
-                    Tool = selectedTool,
-                    OldPath = currentPath,
-                    OriginalIndex = selectedIndex // Optional, if you need to track the index
-                });
+                pathForm.Text = "Edit Path";
+                pathForm.GetPathTextBox().Text = currentPath;
 
-                // Update the tool's path
-                selectedTool.Path = newPath;
+                pathForm.TopMost = true;
 
-                // Save the changes to the configuration
-                SaveToolsToConfig();
+                if (pathForm.ShowDialog() == DialogResult.OK)
+                {
+                    string newPath = pathForm.GetPath();
 
-                // Reapply the search if there is text in the search TextBox, or update the ListBox
-                if (!string.IsNullOrWhiteSpace(textBox1.Text))
-                {
-                    PerformSearch();
-                }
-                else
-                {
-                    UpdateListBox(filteredTools);
+                    if (!string.IsNullOrWhiteSpace(newPath) && newPath != currentPath)
+                    {
+                        // Record the path change in undoStack
+                        undoStack.Push(new UndoOperation
+                        {
+                            Type = OperationType.PathChange,
+                            Tool = selectedTool,
+                            OldPath = currentPath,
+                            OriginalIndex = selectedIndex // Optional, if you need to track the index
+                        });
+
+                        // Update the tool's path
+                        selectedTool.Path = newPath;
+
+
+
+                        // Save the changes to the configuration
+                        SaveToolsToConfig();
+
+                        // Reapply the search if there is text in the search TextBox, or update the ListBox
+                        if (!string.IsNullOrWhiteSpace(textBox1.Text))
+                        {
+                            PerformSearch();
+                        }
+                        else
+                        {
+                            UpdateListBox(filteredTools);
+                        }
+                    }
                 }
             }
         }
     }
-
-
-
 
 
     private void UpdateListBoxForSearch(List<ScriptingTool> items)
@@ -1143,32 +1163,34 @@ public class Form1 : Form
 
     private void listBox1_KeyDown(object sender, KeyEventArgs e)
     {
-        // Check if Ctrl key is held down and not in a search
-        if (e.Control && !isSearchActive)
+        if (e.Control)
         {
-            if (e.KeyCode == Keys.Up || e.KeyCode == Keys.Down)
+            if (e.KeyCode == Keys.C)
             {
-                // Handle Ctrl+Up and Ctrl+Down to prevent the default behavior
-                e.Handled = true;
-                e.SuppressKeyPress = true;
-
-                // Determine the direction based on the key pressed
-                int direction = (e.KeyCode == Keys.Up) ? -1 : 1;
-
-                // Move the selected item based on the direction
-                MoveItem(listBox1.SelectedIndex, direction, true);
-            }
-            else if (e.KeyCode == Keys.C)
-            {
-                // Handle Ctrl+C to copy the path of the selected tool
+                // Handle Ctrl+C to copy the path of the selected tool, regardless of search state
                 CopyPath();
                 e.Handled = true;
             }
             else if (e.KeyCode == Keys.X && e.Shift)
             {
-                // Handle Ctrl+Shift+X to copy the name of the selected tool
+                // Handle Ctrl+Shift+X to copy the name of the selected tool, regardless of search state
                 CopyName();
                 e.Handled = true;
+            }
+            else if (!isSearchActive)
+            {
+                if (e.KeyCode == Keys.Up || e.KeyCode == Keys.Down)
+                {
+                    // Handle Ctrl+Up and Ctrl+Down to prevent the default behavior
+                    e.Handled = true;
+                    e.SuppressKeyPress = true;
+
+                    // Determine the direction based on the key pressed
+                    int direction = (e.KeyCode == Keys.Up) ? -1 : 1;
+
+                    // Move the selected item based on the direction
+                    MoveItem(listBox1.SelectedIndex, direction, true);
+                }
             }
         }
         else if (e.KeyCode == Keys.Enter)
@@ -1179,19 +1201,54 @@ public class Form1 : Form
         }
     }
 
+
+
     private void CopyName()
     {
         int selectedIndex = listBox1.SelectedIndex;
-        if (selectedIndex >= 0 && selectedIndex < tools.Count)
+
+        // Check if an item is selected
+        if (selectedIndex >= 0)
         {
-            ScriptingTool selectedTool = tools[selectedIndex];
+            ScriptingTool selectedTool;
+
+            // Determine which list to use based on search state
+            if (isSearchActive)
+            {
+                // Use the filtered list when a search is active
+                if (selectedIndex < filteredTools.Count)
+                {
+                    selectedTool = filteredTools[selectedIndex];
+                }
+                else
+                {
+                    MessageBox.Show("Invalid selection.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+            }
+            else
+            {
+                // Use the complete list when no search is active
+                if (selectedIndex < tools.Count)
+                {
+                    selectedTool = tools[selectedIndex];
+                }
+                else
+                {
+                    MessageBox.Show("Invalid selection.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+            }
+
+            // Copy the name to the clipboard
             Clipboard.SetText(selectedTool.Name);
         }
         else
         {
-            MessageBox.Show("Please select a valid tool to copy its name.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Hand);
+            MessageBox.Show("No item selected.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
     }
+
 
 
 
@@ -1299,7 +1356,7 @@ public class Form1 : Form
                     {
                         FileName = "cmd.exe",
                         Arguments = "/k \"" + selectedTool.Path + "\" " + selectedTool.CustomFlags,
-                        WorkingDirectory = Path.GetDirectoryName(selectedTool.Path),
+                        WorkingDirectory = System.IO.Path.GetDirectoryName(selectedTool.Path),
                         CreateNoWindow = false
                     });
                 }
@@ -1309,7 +1366,7 @@ public class Form1 : Form
                     {
                         FileName = "cmd.exe",
                         Arguments = "/k python \"" + selectedTool.Path + "\" " + selectedTool.CustomFlags,
-                        WorkingDirectory = Path.GetDirectoryName(selectedTool.Path),
+                        WorkingDirectory = System.IO.Path.GetDirectoryName(selectedTool.Path),
                         CreateNoWindow = false
                     });
                 }
@@ -1319,7 +1376,7 @@ public class Form1 : Form
                     {
                         FileName = "powershell.exe",
                         Arguments = "-File \"" + selectedTool.Path + "\" " + selectedTool.CustomFlags,
-                        WorkingDirectory = Path.GetDirectoryName(selectedTool.Path),
+                        WorkingDirectory = System.IO.Path.GetDirectoryName(selectedTool.Path),
                         CreateNoWindow = false
                     });
                 }
@@ -1328,7 +1385,7 @@ public class Form1 : Form
                     Process.Start(new ProcessStartInfo
                     {
                         FileName = selectedTool.Path,
-                        WorkingDirectory = Path.GetDirectoryName(selectedTool.Path),
+                        WorkingDirectory = System.IO.Path.GetDirectoryName(selectedTool.Path),
                         CreateNoWindow = false
                     });
                 }
@@ -1339,7 +1396,7 @@ public class Form1 : Form
                     {
                         FileName = "java.exe",
                         Arguments = $"-jar \"{selectedTool.Path}\"",
-                        WorkingDirectory = Path.GetDirectoryName(selectedTool.Path),
+                        WorkingDirectory = System.IO.Path.GetDirectoryName(selectedTool.Path),
                         CreateNoWindow = false
                     });
                 }
@@ -1348,7 +1405,7 @@ public class Form1 : Form
                     Process.Start(new ProcessStartInfo
                     {
                         FileName = selectedTool.Path,
-                        WorkingDirectory = Path.GetDirectoryName(selectedTool.Path),
+                        WorkingDirectory = System.IO.Path.GetDirectoryName(selectedTool.Path),
                         UseShellExecute = true  // Important for launching .lnk files
                     });
                 }
@@ -1523,7 +1580,7 @@ public class Form1 : Form
                     };
                     if (openFileDialog.ShowDialog() == DialogResult.OK)
                     {
-                        string defaultName = Path.GetFileNameWithoutExtension(openFileDialog.FileName);
+                        string defaultName = System.IO.Path.GetFileNameWithoutExtension(openFileDialog.FileName);
                         using (EnterToolName toolNameForm = new EnterToolName(defaultName))
                         {
                             if (toolNameForm.ShowDialog() == DialogResult.OK)
@@ -1549,7 +1606,7 @@ public class Form1 : Form
 
                     if (openFileDialog.ShowDialog() == DialogResult.OK)
                     {
-                        string defaultName = Path.GetFileNameWithoutExtension(openFileDialog.FileName);
+                        string defaultName = System.IO.Path.GetFileNameWithoutExtension(openFileDialog.FileName);
                         using (EnterToolName toolNameForm = new EnterToolName(defaultName))
                         {
                             if (toolNameForm.ShowDialog() == DialogResult.OK)
@@ -1574,7 +1631,7 @@ public class Form1 : Form
 
                     if (openFileDialog.ShowDialog() == DialogResult.OK)
                     {
-                        string defaultName = Path.GetFileNameWithoutExtension(openFileDialog.FileName);
+                        string defaultName = System.IO.Path.GetFileNameWithoutExtension(openFileDialog.FileName);
                         using (EnterToolName toolNameForm = new EnterToolName(defaultName))
                         {
                             if (toolNameForm.ShowDialog() == DialogResult.OK)
@@ -1720,6 +1777,14 @@ public class Form1 : Form
 
 
 
+    private void listBox1_KeyPress(object sender, KeyPressEventArgs e)
+    {
+        if (Control.ModifierKeys == Keys.Control)
+        {
+            // Suppress the keypress when Control is pressed
+            e.Handled = true;
+        }
+    }
 
 
 
@@ -1738,12 +1803,12 @@ public class Form1 : Form
         }
         else if (e.KeyCode == Keys.Escape)
         {
-            // Reset TextBox and remove focus
-            textBox1.Text = string.Empty;
-            textBox1.Focus();
+            textBox1.Text = string.Empty; // Optionally clear the text
+            listBox1.Focus(); // Set focus to listBox1
             e.SuppressKeyPress = true; // Suppress the Escape key
         }
     }
+
 
     private void textBox1_LostFocus(object sender, EventArgs e)
     {
@@ -2619,7 +2684,7 @@ public class Form1 : Form
         textBox1.TextAlign = HorizontalAlignment.Center;
 
         // Form properties
-        this.BackColor = Color.Blue;
+        this.BackColor = SystemColors.ButtonFace;
         this.ForeColor = SystemColors.ButtonFace;
 
         // Refresh the form to apply the changes
@@ -2947,16 +3012,49 @@ public class Form1 : Form
     private void CopyPath()
     {
         int selectedIndex = listBox1.SelectedIndex;
-        if (selectedIndex >= 0 && selectedIndex < tools.Count)
+
+        // Check if an item is selected
+        if (selectedIndex >= 0)
         {
-            ScriptingTool selectedTool = tools[selectedIndex];
+            ScriptingTool selectedTool;
+
+            // Determine which list to use based on search state
+            if (isSearchActive)
+            {
+                // Use the filtered list when a search is active
+                if (selectedIndex < filteredTools.Count)
+                {
+                    selectedTool = filteredTools[selectedIndex];
+                }
+                else
+                {
+                    MessageBox.Show("Invalid selection.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+            }
+            else
+            {
+                // Use the complete list when no search is active
+                if (selectedIndex < tools.Count)
+                {
+                    selectedTool = tools[selectedIndex];
+                }
+                else
+                {
+                    MessageBox.Show("Invalid selection.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+            }
+
+            // Copy the path to the clipboard
             Clipboard.SetText(selectedTool.Path);
         }
         else
         {
-            MessageBox.Show("Please select a valid tool to copy its path.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Hand);
+            MessageBox.Show("No item selected.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
     }
+
 
 
     private void CopyFlags()
@@ -2999,7 +3097,7 @@ public class Form1 : Form
             if (selectedIndex >= 0 && selectedIndex < filteredTools.Count)
             {
                 ScriptingTool selectedTool = filteredTools[selectedIndex];
-                string folderPath = Path.GetDirectoryName(selectedTool.Path);
+                string folderPath = System.IO.Path.GetDirectoryName(selectedTool.Path);
 
                 if (!string.IsNullOrEmpty(folderPath))
                 {
@@ -3010,7 +3108,7 @@ public class Form1 : Form
                     }
                     else
                     {
-                        string extension = Path.GetExtension(selectedTool.Path).ToLower();
+                        string extension = System.IO.Path.GetExtension(selectedTool.Path).ToLower();
 
                         // Allowed script file extensions
                         List<string> allowedExtensions = new List<string> { ".bat", ".exe", ".ps1", ".py" };
@@ -3042,7 +3140,7 @@ public class Form1 : Form
             if (selectedIndex >= 0 && selectedIndex < tools.Count)
             {
                 ScriptingTool selectedTool = tools[selectedIndex];
-                string folderPath = Path.GetDirectoryName(selectedTool.Path);
+                string folderPath = System.IO.Path.GetDirectoryName(selectedTool.Path);
 
                 if (!string.IsNullOrEmpty(folderPath))
                 {
@@ -3053,7 +3151,7 @@ public class Form1 : Form
                     }
                     else
                     {
-                        string extension = Path.GetExtension(selectedTool.Path).ToLower();
+                        string extension = System.IO.Path.GetExtension(selectedTool.Path).ToLower();
 
                         // Allowed script file extensions
                         List<string> allowedExtensions = new List<string> { ".bat", ".exe", ".ps1", ".py" };
